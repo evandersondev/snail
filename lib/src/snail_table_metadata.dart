@@ -1,7 +1,7 @@
 class SnailTableMetadata {
   final String tableName;
   final String primaryKeyColumn;
-  final List<Object> fields;
+  final Map<String, SqliteType> fields;
 
   const SnailTableMetadata({
     required this.tableName,
@@ -11,44 +11,35 @@ class SnailTableMetadata {
 
   /// Gera a consulta de criação da tabela
   String generateCreateTableQuery() {
-    final fieldsMap = _typesToSqlMap(fields);
-
-    final fieldDefinitions = fieldsMap.entries
-        .map((entry) => '${entry.key} ${entry.value}')
+    final fieldDefinitions = fields.entries
+        .map((entry) => '${entry.key} ${entry.value.toSql()}')
         .join(', ');
 
     return '''
-      CREATE TABLE $tableName (
+      CREATE TABLE IF NOT EXISTS $tableName (
         $fieldDefinitions,
         PRIMARY KEY ($primaryKeyColumn)
       )
     ''';
   }
+}
 
-  /// Converte os tipos dos objetos para tipos SQL
-  Map<String, String> _typesToSqlMap(List<Object> objects) {
-    Map<String, String> resultMap = {};
+enum SqliteType {
+  integer,
+  text,
+  real,
+  blob;
 
-    for (var obj in objects) {
-      var type = obj.runtimeType;
-      resultMap[obj.toString()] = _sqlFromType(type);
-    }
-
-    return resultMap;
-  }
-
-  /// Converte o tipo para o tipo SQL correspondente
-  String _sqlFromType(Type type) {
-    if (type == int) {
-      return 'INTEGER';
-    } else if (type == String) {
-      return 'TEXT';
-    } else if (type == double) {
-      return 'REAL';
-    } else if (type == bool) {
-      return 'INTEGER';
-    } else {
-      return 'UNKNOWN'; // Tipo não reconhecido
+  String toSql() {
+    switch (this) {
+      case SqliteType.integer:
+        return 'INTEGER';
+      case SqliteType.text:
+        return 'TEXT';
+      case SqliteType.real:
+        return 'REAL';
+      case SqliteType.blob:
+        return 'BLOB';
     }
   }
 }

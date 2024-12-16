@@ -8,10 +8,13 @@ import 'app/models/user_model.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Snail.initialize(databaseName: 'example', models: [
-    UserModel,
-    ProductModel,
-  ]);
+  await Snail.initialize(
+    databaseName: 'example',
+    models: [
+      UserModel(),
+      ProductModel(),
+    ],
+  );
 
   runApp(AppWidget());
 }

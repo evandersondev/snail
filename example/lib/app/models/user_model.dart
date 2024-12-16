@@ -8,19 +8,10 @@ class UserModel extends SnailTableModel {
   final String email;
 
   UserModel({
-    required this.id,
-    required this.name,
-    required this.email,
+    this.id = 0,
+    this.name = '',
+    this.email = '',
   });
-
-  String get test => '';
-
-  @override
-  SnailTableMetadata get metadata => SnailTableMetadata(
-        tableName: 'users',
-        primaryKeyColumn: 'id',
-        fields: [id, name, email],
-      );
 
   Map<String, dynamic> toMap() {
     final result = <String, dynamic>{};
@@ -44,4 +35,15 @@ class UserModel extends SnailTableModel {
 
   factory UserModel.fromJson(String source) =>
       UserModel.fromMap(json.decode(source));
+
+  @override
+  SnailTableMetadata get metadata => SnailTableMetadata(
+        tableName: 'users',
+        primaryKeyColumn: 'id',
+        fields: {
+          'id': SqliteType.integer,
+          'name': SqliteType.text,
+          'email': SqliteType.text,
+        },
+      );
 }

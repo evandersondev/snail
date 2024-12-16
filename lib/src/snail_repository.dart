@@ -10,31 +10,6 @@ abstract class SnailRepository<T, ID> {
     required this.primaryKeyColumn,
   });
 
-  // Método para criar a consulta SQL de criação da tabela
-  // static String createTableQuery(
-  //   SnailTableModel model,
-  //   String tableName,
-  //   String primaryKeyColumn,
-  // ) {
-  //   // Obter os campos e tipos definidos no modelo
-  //   final fields = model.defineFields();
-
-  //   // Construir a parte da consulta SQL para os campos da tabela
-  //   final columns = fields.entries.map((entry) {
-  //     final columnName = entry.key;
-  //     final columnType = model.getSqliteType(entry.value);
-  //     return '$columnName $columnType';
-  //   }).join(', ');
-
-  //   // Consulta para criar a tabela
-  //   return '''
-  //   CREATE TABLE $tableName (
-  //     $primaryKeyColumn INTEGER PRIMARY KEY AUTOINCREMENT,
-  //     $columns
-  //   );
-  // ''';
-  // }
-
   Future<Database> _getDatabase() async {
     return await Snail.getDatabase();
   }

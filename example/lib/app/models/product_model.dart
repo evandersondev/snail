@@ -8,16 +8,20 @@ class ProductModel extends SnailTableModel {
   final double price;
 
   ProductModel({
-    required this.id,
-    required this.productName,
-    required this.price,
+    this.id = 0,
+    this.productName = '',
+    this.price = 0.0,
   });
 
   @override
   SnailTableMetadata get metadata => SnailTableMetadata(
         tableName: 'products',
         primaryKeyColumn: 'id',
-        fields: [id, productName, price],
+        fields: {
+          'id': SqliteType.integer,
+          'productName': SqliteType.text,
+          'price': SqliteType.real,
+        },
       );
 
   Map<String, dynamic> toMap() {
