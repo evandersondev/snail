@@ -1,3 +1,7 @@
+## [1.0.2] - Readme Update
+
+- Transform README documetation to English.
+
 ## [1.0.2] - FLutter SDK
 
 - Limit sdk versions.

@@ -1,26 +1,28 @@
 # 🐌 Snail: A Simple ORM-like Library for Flutter/Dart 🐦
 
-**Snail** é uma biblioteca inspirada no JPA do Spring Boot que facilita o gerenciamento de banco de dados SQLite em aplicações Flutter/Dart. Rápido de usar e simples como uma lesma 🐌 (mas funcional como um foguete 🚀)!
-
-## 🌟 Recursos
-
-- 📦 Criação automática de tabelas no SQLite com base em repositórios.
-- 🔄 Métodos CRUD prontos: _create_, _read_, _update_, _delete_.
-- 🛠️ Manipulação de múltiplos registros com `createMany`, `findMany`, etc.
-- 💡 Abstração com `SnailRepository` e mapeamento simples de entidades.
+**Snail** is a library inspired by Spring Boot's JPA, designed to simplify SQLite database management in Flutter/Dart applications. Easy to use like a snail 🐌 (but as functional as a rocket 🚀)!
 
 ---
 
-## 🚀 Instalação
+## 🌟 Features
 
-Adicione o Snail ao seu projeto no `pubspec.yaml`:
+- 📦 **Automatic table creation** in SQLite based on repositories.
+- 🔄 Ready-to-use **CRUD methods**: _create_, _read_, _update_, _delete_.
+- 🛠️ **Batch operations** like `createMany` and `findMany`.
+- 💡 Abstraction with `SnailRepository` and straightforward entity mapping.
+
+---
+
+## 🚀 Installation
+
+Add Snail to your project by including it in `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  snail: ^1.0.2
+  snail: ^1.0.3
 ```
 
-Instale com:
+Install the dependency:
 
 ```bash
 flutter pub get
@@ -28,11 +30,11 @@ flutter pub get
 
 ---
 
-## 🛠️ Configuração Inicial
+## 🛠️ Initial Setup
 
-### 1⃣ **Defina seu Modelo**
+### 1 - **Define Your Model**
 
-Crie uma classe representando a entidade:
+Create a class representing your database entity:
 
 ```dart
 class UserModel {
@@ -58,9 +60,9 @@ class UserModel {
 
 ---
 
-### 2⃣ **Crie o Repositório**
+### 2 - **Create the Repository**
 
-Extenda o `SnailRepository` para definir o repositório de dados:
+Extend the `SnailRepository` to define your data repository:
 
 ```dart
 import 'package:snail/snail.dart';
@@ -88,9 +90,9 @@ class UserRepository extends SnailRepository<UserModel, int> {
 
 ---
 
-### 3⃣ **Inicialize o Banco de Dados**
+### 3 - **Initialize the Database**
 
-Configure os repositórios no `main()`:
+Configure repositories in the `main()` function:
 
 ```dart
 import 'package:flutter/material.dart';
@@ -112,16 +114,16 @@ void main() async {
 
 ---
 
-## 🎉 **Exemplo de Uso**
+## 🎉 **Usage Examples**
 
-### 📌 Criar um Novo Registro
+### 📌 Create a New Record
 
 ```dart
 final userRepo = UserRepository();
 await userRepo.create(UserModel(id: 1, name: 'John Doe', email: 'john@example.com'));
 ```
 
-### 🔍 Buscar um Registro por ID
+### 🔍 Fetch a Record by ID
 
 ```dart
 final user = await userRepo.findOne(1);
@@ -130,27 +132,27 @@ if (user != null) {
 }
 ```
 
-### 📋 Buscar Todos os Registros
+### 📋 Fetch All Records
 
 ```dart
 final users = await userRepo.findMany();
 users.forEach((user) => print(user.name));
 ```
 
-### 🛠️ Atualizar um Registro
+### 🛠️ Update a Record
 
 ```dart
 final updatedUser = UserModel(id: 1, name: 'Jane Doe', email: 'jane@example.com');
 await userRepo.update(updatedUser);
 ```
 
-### 🗑️ Deletar um Registro
+### 🗑️ Delete a Record
 
 ```dart
 await userRepo.delete(1);
 ```
 
-### 🚀 Criar Vários Registros
+### 🚀 Create Multiple Records
 
 ```dart
 await userRepo.createMany([
@@ -161,26 +163,26 @@ await userRepo.createMany([
 
 ---
 
-## 🧪 **API Completa**
+## 🧬 **Full API**
 
-### Métodos CRUD:
+### CRUD Methods:
 
-| Método                 | Descrição                     |
-| ---------------------- | ----------------------------- |
-| `create(T entity)`     | Cria um novo registro.        |
-| `createMany(List<T>)`  | Cria múltiplos registros.     |
-| `findOne(ID id)`       | Busca um registro por ID.     |
-| `findMany()`           | Busca todos os registros.     |
-| `update(T entity)`     | Atualiza um registro.         |
-| `updateMany(List<T>)`  | Atualiza múltiplos registros. |
-| `delete(ID id)`        | Deleta um registro pelo ID.   |
-| `deleteMany(List<ID>)` | Deleta múltiplos registros.   |
+| Method                 | Description               |
+| ---------------------- | ------------------------- |
+| `create(T entity)`     | Creates a new record.     |
+| `createMany(List<T>)`  | Creates multiple records. |
+| `findOne(ID id)`       | Fetches a record by ID.   |
+| `findMany()`           | Fetches all records.      |
+| `update(T entity)`     | Updates a record.         |
+| `updateMany(List<T>)`  | Updates multiple records. |
+| `delete(ID id)`        | Deletes a record by ID.   |
+| `deleteMany(List<ID>)` | Deletes multiple records. |
 
 ---
 
-## 🧬 **Testando**
+## 🧪 **Testing**
 
-Exemplo básico de teste unitário:
+A basic unit test example:
 
 ```dart
 void main() async {
@@ -196,21 +198,21 @@ void main() async {
 
 ---
 
-## 💛 **Contribuindo**
+## 💛 **Contributing**
 
-Contribuições são super bem-vindas! Abra uma _issue_ ou envie um _pull request_ no repositório do GitHub.
-
----
-
-## 📜 **Licença**
-
-Este projeto está licenciado sob a licença **MIT**.
+Contributions are always welcome! Open an issue or submit a pull request on the GitHub repository.
 
 ---
 
-## 🚀 **Pronto para usar?**
+## 📜 **License**
 
-Dê um _push_ na sua produtividade com **Snail** e torne suas operações no SQLite mais simples e rápidas! 🐌💨
+This project is licensed under the **MIT License**.
+
+---
+
+## 🚀 **Ready to Simplify Your SQLite?**
+
+Boost your productivity with **Snail** and make your SQLite operations simple and efficient! 🐌💨
 
 ---
 
