@@ -1,28 +1,15 @@
 import 'dart:convert';
 
-import 'package:snail/snail.dart';
-
-class ProductModel extends SnailTableModel {
+class ProductModel {
   final int id;
   final String productName;
   final double price;
 
   ProductModel({
-    this.id = 0,
-    this.productName = '',
-    this.price = 0.0,
+    required this.id,
+    required this.productName,
+    required this.price,
   });
-
-  @override
-  SnailTableMetadata get metadata => SnailTableMetadata(
-        tableName: 'products',
-        primaryKeyColumn: 'id',
-        fields: {
-          'id': SqliteType.integer,
-          'productName': SqliteType.text,
-          'price': SqliteType.real,
-        },
-      );
 
   Map<String, dynamic> toMap() {
     final result = <String, dynamic>{};

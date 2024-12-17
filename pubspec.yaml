@@ -1,10 +1,15 @@
 name: snail
-description: A starting point for Dart libraries or applications.
+description: A Simple ORM-like Library for Flutter/Dart.
 version: 1.0.0
-# repository: https://github.com/my_org/my_repo
+homepage: https://github.com/evandersondev/snail
 
 environment:
   sdk: ">=3.6.0 <4.0.0"
+
+platforms:
+  android:
+  ios:
+  macos:
 
 # Add regular dependencies here.
 dependencies:

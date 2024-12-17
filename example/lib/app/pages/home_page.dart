@@ -1,6 +1,7 @@
-import 'package:example_snail_package/app/models/user_model.dart';
-import 'package:example_snail_package/app/repositories/user_repository.dart';
 import 'package:flutter/material.dart';
+
+import '../models/user_model.dart';
+import '../repositories/user_repository.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,18 +19,34 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
 
-    // initAsync();
+    initAsync();
   }
 
   Future<void> initAsync() async {
     final response = await _respository.findMany();
 
-    print(response);
+    setState(() {
+      users = response;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          await _respository.create(
+            UserModel(
+              id: 1,
+              name: 'Evnderson',
+              email: 'evandersondev@mail.com',
+            ),
+          );
+
+          await initAsync();
+        },
+        child: Icon(Icons.add),
+      ),
       body: ListView.separated(
         separatorBuilder: (context, index) => SizedBox(height: 12),
         itemCount: users.length,
@@ -37,6 +54,13 @@ class _HomePageState extends State<HomePage> {
           return ListTile(
             title: Text(users[index].name),
             subtitle: Text(users[index].email),
+            trailing: IconButton(
+              onPressed: () async {
+                await _respository.delete(users[index].id);
+                await initAsync();
+              },
+              icon: Icon(Icons.delete),
+            ),
           );
         },
       ),

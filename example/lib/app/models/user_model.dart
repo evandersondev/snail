@@ -1,16 +1,14 @@
 import 'dart:convert';
 
-import 'package:snail/snail.dart';
-
-class UserModel extends SnailTableModel {
+class UserModel {
   final int id;
   final String name;
   final String email;
 
   UserModel({
-    this.id = 0,
-    this.name = '',
-    this.email = '',
+    required this.id,
+    required this.name,
+    required this.email,
   });
 
   Map<String, dynamic> toMap() {
@@ -35,15 +33,4 @@ class UserModel extends SnailTableModel {
 
   factory UserModel.fromJson(String source) =>
       UserModel.fromMap(json.decode(source));
-
-  @override
-  SnailTableMetadata get metadata => SnailTableMetadata(
-        tableName: 'users',
-        primaryKeyColumn: 'id',
-        fields: {
-          'id': SqliteType.integer,
-          'name': SqliteType.text,
-          'email': SqliteType.text,
-        },
-      );
 }

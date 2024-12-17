@@ -1,52 +1,29 @@
 import 'package:path/path.dart';
+import 'package:snail/src/snail_repository.dart';
 import 'package:sqflite/sqflite.dart';
-
-import 'snail_table_model.dart';
 
 class Snail {
   static Database? _database;
 
   /// Inicializa o banco de dados e cria as tabelas
   static Future<void> initialize({
-    required String databaseName,
-    required List<SnailTableModel> models,
+    String? databaseName,
+    required List<SnailRepository> repositories,
   }) async {
-    print('*** SnailDatabase initialize ***');
+    print('*** SnailDatabase initialized ***');
 
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, '$databaseName.db');
-    print(models);
+    final path = join(dbPath, '${databaseName ?? "snail_database"}.db');
 
     _database = await openDatabase(
       path,
       version: 1,
-      // onCreate: (db, version) async {
-      //   print('Creating tables');
-      //   for (var model in models) {
-      //     // Verifica se o tipo é uma subclasse de SnailTableModel
-      //     var metadata = model.metadata;
-      //     var createTableQuery = metadata.generateCreateTableQuery();
-      //     await db.execute(createTableQuery);
-      //     print('Create table ${metadata.tableName}');
-      //     // Aqui você pode executar a consulta para criar a tabela no banco
-      //   }
-      // },
-      onOpen: (db) async {
-        print('Creating tables');
-        for (var model in models) {
-          // Verifica se o tipo é uma subclasse de SnailTableModel
-          print(model.hashCode);
-          var metadata = model.metadata;
-          var createTableQuery = metadata.generateCreateTableQuery();
-          print(createTableQuery);
-          // await db.execute(createTableQuery);
-          print('Create table ${metadata.tableName}');
-          // Aqui você pode executar a consulta para criar a tabela no banco
+      onCreate: (db, version) async {
+        for (var repository in repositories) {
+          var createTableQuery = repository.generateCreateTableQuery();
+          await db.execute(createTableQuery);
+          print('--- Create table ${repository.tableName} ---');
         }
-
-        // final result = await db.rawQuery('SELECT * from users;');
-
-        // print(result);
       },
       singleInstance: true,
     );

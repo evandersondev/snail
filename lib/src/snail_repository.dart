@@ -4,14 +4,43 @@ import 'package:sqflite/sqflite.dart';
 abstract class SnailRepository<T, ID> {
   final String tableName;
   final String primaryKeyColumn;
+  final Map<String, Type> defineFields;
 
   SnailRepository({
     required this.tableName,
     required this.primaryKeyColumn,
+    required this.defineFields,
   });
 
   Future<Database> _getDatabase() async {
     return await Snail.getDatabase();
+  }
+
+  String generateCreateTableQuery() {
+    final fieldDefinitions = defineFields.entries
+        .map((entry) => '${entry.key} ${_typeToSql(entry.value)}')
+        .join(', ');
+
+    return '''
+      CREATE TABLE IF NOT EXISTS $tableName (
+        $fieldDefinitions,
+        PRIMARY KEY ($primaryKeyColumn)
+      )
+    ''';
+  }
+
+  String _typeToSql(Type type) {
+    if (type == int) {
+      return 'INTEGER';
+    } else if (type == String) {
+      return 'TEXT';
+    } else if (type == double) {
+      return 'REAL';
+    } else if (type == bool) {
+      return 'INTEGER';
+    } else {
+      return 'BLOB';
+    }
   }
 
   // Criar um item
@@ -83,7 +112,7 @@ abstract class SnailRepository<T, ID> {
       tableName,
       toMap(entity),
       where: '$primaryKeyColumn = ?',
-      whereArgs: [getId(entity)],
+      whereArgs: [primaryKeyColumn],
     );
     return result;
   }
@@ -97,7 +126,7 @@ abstract class SnailRepository<T, ID> {
         tableName,
         toMap(entity),
         where: '$primaryKeyColumn = ?',
-        whereArgs: [getId(entity)],
+        whereArgs: [primaryKeyColumn],
       );
     }
     return updatedCount;
@@ -106,5 +135,4 @@ abstract class SnailRepository<T, ID> {
   // Métodos a serem implementados nas subclasses
   Map<String, dynamic> toMap(T entity);
   T fromMap(Map<String, dynamic> map);
-  ID getId(T entity);
 }

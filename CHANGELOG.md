@@ -1,3 +1,3 @@
-## 1.0.0
+## [1.0.0] - First release
 
-- Initial version.
+- Initial version to suport android, ios and macos.
