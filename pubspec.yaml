@@ -1,10 +1,10 @@
 name: snail
-description: A Simple ORM-like Library for Flutter/Dart.
-version: 1.0.0
+description: A library inspired by Spring Boot's JPA that facilitates SQLite database management in Flutter/Dart applications.
+version: 1.0.1
 homepage: https://github.com/evandersondev/snail
 
 environment:
-  sdk: ">=3.6.0 <4.0.0"
+  sdk: ^3.6.0
 
 platforms:
   android:
@@ -13,8 +13,8 @@ platforms:
 
 # Add regular dependencies here.
 dependencies:
-  sqflite: ^2.4.1
   path: ^1.9.0
+  sqflite: ^2.4.1
 
 dev_dependencies:
   lints: ^5.1.0

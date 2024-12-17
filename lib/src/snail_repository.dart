@@ -1,11 +1,23 @@
-import 'package:snail/snail.dart';
 import 'package:sqflite/sqflite.dart';
 
+import 'package:snail/snail.dart';
+
+/// A base class for repositories that handle the operations on database tables.
+///
+/// It provides methods for creating, reading, updating, and deleting records in 
+/// the database table defined by the repository. It uses SQLite as the database 
+/// backend via the [sqflite] package.
 abstract class SnailRepository<T, ID> {
   final String tableName;
   final String primaryKeyColumn;
   final Map<String, Type> defineFields;
 
+  /// Creates an instance of [SnailRepository] with the specified table name, 
+  /// primary key column, and field definitions.
+  ///
+  /// [tableName] is the name of the table in the database.
+  /// [primaryKeyColumn] is the column name that serves as the primary key.
+  /// [defineFields] is a map of column names to data types that defines the schema of the table.
   SnailRepository({
     required this.tableName,
     required this.primaryKeyColumn,
@@ -16,6 +28,9 @@ abstract class SnailRepository<T, ID> {
     return await Snail.getDatabase();
   }
 
+  /// Generates the SQL query to create the table for this repository.
+  ///
+  /// This method converts the field definitions into a valid SQL `CREATE TABLE` statement.
   String generateCreateTableQuery() {
     final fieldDefinitions = defineFields.entries
         .map((entry) => '${entry.key} ${_typeToSql(entry.value)}')
@@ -29,6 +44,7 @@ abstract class SnailRepository<T, ID> {
     ''';
   }
 
+  /// Converts a Dart [Type] to its corresponding SQL type.
   String _typeToSql(Type type) {
     if (type == int) {
       return 'INTEGER';
@@ -43,14 +59,20 @@ abstract class SnailRepository<T, ID> {
     }
   }
 
-  // Criar um item
+  /// Inserts a new item into the database.
+  ///
+  /// [entity] is the object to be inserted into the database.
+  /// Returns the ID of the newly created record.
   Future<int> create(T entity) async {
     final db = await _getDatabase();
     var result = await db.insert(tableName, toMap(entity));
     return result;
   }
 
-  // Criar muitos itens
+  /// Inserts multiple items into the database.
+  ///
+  /// [entities] is a list of objects to be inserted into the database.
+  /// Returns a list of IDs of the newly created records.
   Future<List<int>> createMany(List<T> entities) async {
     final db = await _getDatabase();
     List<int> ids = [];
@@ -61,7 +83,10 @@ abstract class SnailRepository<T, ID> {
     return ids;
   }
 
-  // Encontrar um item por id
+  /// Retrieves a single item by its ID from the database.
+  ///
+  /// [id] is the primary key value of the item to be retrieved.
+  /// Returns the entity of type [T], or null if not found.
   Future<T?> findOne(ID id) async {
     final db = await _getDatabase();
     var result = await db.query(
@@ -75,14 +100,19 @@ abstract class SnailRepository<T, ID> {
     return null;
   }
 
-  // Encontrar muitos itens
+  /// Retrieves all items from the database.
+  ///
+  /// Returns a list of entities of type [T].
   Future<List<T>> findMany() async {
     final db = await _getDatabase();
     var result = await db.query(tableName);
     return result.map((e) => fromMap(e)).toList();
   }
 
-  // Deletar um item
+  /// Deletes an item by its ID from the database.
+  ///
+  /// [id] is the primary key value of the item to be deleted.
+  /// Returns the number of rows affected.
   Future<int> delete(ID id) async {
     final db = await _getDatabase();
     var result = await db.delete(
@@ -93,7 +123,10 @@ abstract class SnailRepository<T, ID> {
     return result;
   }
 
-  // Deletar muitos itens
+  /// Deletes multiple items by their IDs from the database.
+  ///
+  /// [ids] is a list of primary key values of the items to be deleted.
+  /// Returns the number of rows affected.
   Future<int> deleteMany(List<ID> ids) async {
     final db = await _getDatabase();
     var result = await db.delete(
@@ -105,7 +138,10 @@ abstract class SnailRepository<T, ID> {
     return result;
   }
 
-  // Atualizar um item
+  /// Updates an existing item in the database.
+  ///
+  /// [entity] is the object to be updated.
+  /// Returns the number of rows affected.
   Future<int> update(T entity) async {
     final db = await _getDatabase();
     var result = await db.update(
@@ -117,7 +153,10 @@ abstract class SnailRepository<T, ID> {
     return result;
   }
 
-  // Atualizar muitos itens
+  /// Updates multiple items in the database.
+  ///
+  /// [entities] is a list of objects to be updated.
+  /// Returns the number of rows affected.
   Future<int> updateMany(List<T> entities) async {
     final db = await _getDatabase();
     int updatedCount = 0;
@@ -132,7 +171,15 @@ abstract class SnailRepository<T, ID> {
     return updatedCount;
   }
 
-  // Métodos a serem implementados nas subclasses
+  /// Converts an entity of type [T] to a map that can be inserted into the database.
+  ///
+  /// This method must be implemented by subclasses to define how an entity is
+  /// converted to a map representation.
   Map<String, dynamic> toMap(T entity);
+
+  /// Converts a map from the database to an entity of type [T].
+  ///
+  /// This method must be implemented by subclasses to define how a map is
+  /// converted back to an entity.
   T fromMap(Map<String, dynamic> map);
 }
