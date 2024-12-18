@@ -1,18 +1,17 @@
-import 'package:sqflite/sqflite.dart';
-
 import 'package:snail/snail.dart';
+import 'package:sqflite/sqflite.dart';
 
 /// A base class for repositories that handle the operations on database tables.
 ///
-/// It provides methods for creating, reading, updating, and deleting records in 
-/// the database table defined by the repository. It uses SQLite as the database 
+/// It provides methods for creating, reading, updating, and deleting records in
+/// the database table defined by the repository. It uses SQLite as the database
 /// backend via the [sqflite] package.
 abstract class SnailRepository<T, ID> {
   final String tableName;
   final String primaryKeyColumn;
   final Map<String, Type> defineFields;
 
-  /// Creates an instance of [SnailRepository] with the specified table name, 
+  /// Creates an instance of [SnailRepository] with the specified table name,
   /// primary key column, and field definitions.
   ///
   /// [tableName] is the name of the table in the database.
@@ -30,7 +29,7 @@ abstract class SnailRepository<T, ID> {
 
   /// Generates the SQL query to create the table for this repository.
   ///
-  /// This method converts the field definitions into a valid SQL `CREATE TABLE` statement.
+  /// This method converts the field definitions into a valid SQL CREATE TABLE statement.
   String generateCreateTableQuery() {
     final fieldDefinitions = defineFields.entries
         .map((entry) => '${entry.key} ${_typeToSql(entry.value)}')

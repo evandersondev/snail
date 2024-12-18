@@ -1,3 +1,7 @@
+## [1.0.4] - Pubspec
+
+- Update pubspec.
+
 ## [1.0.3] - Readme Update
 
 - Transform README documetation to English.

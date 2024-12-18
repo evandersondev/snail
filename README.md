@@ -19,7 +19,7 @@ Add Snail to your project by including it in `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  snail: ^1.0.3
+  snail: ^1.0.4
 ```
 
 Install the dependency:

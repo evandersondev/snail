@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="snail API docs, for the Dart programming language.">
+  <title>snail - Dart API docs</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="static-assets/github.css?v1">
+  <link rel="stylesheet" href="static-assets/styles.css?v1">
+  <link rel="icon" href="static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="https://github.com/evandersondev/snail">snail package</a></li>
+  </ol>
+  <div class="self-name">snail</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button" title="Toggle brightness">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span id="dark-theme-button" class="material-symbols-outlined">
+        dark_mode
+      </span>
+      <span id="light-theme-button" class="material-symbols-outlined">
+        light_mode
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+  <div id="dartdoc-main-content" class="main-content">
+      
+<section class="desc markdown">
+  <h1 id="-snail-a-simple-orm-like-library-for-flutterdart-">🐌 Snail: A Simple ORM-like Library for Flutter/Dart 🐦</h1>
+<p><strong>Snail</strong> is a library inspired by Spring Boot's JPA, designed to simplify SQLite database management in Flutter/Dart applications. Easy to use like a snail 🐌 (but as functional as a rocket 🚀)!</p>
+<hr>
+<h2 id="-features">🌟 Features</h2>
+<ul>
+<li>📦 <strong>Automatic table creation</strong> in SQLite based on repositories.</li>
+<li>🔄 Ready-to-use <strong>CRUD methods</strong>: <em>create</em>, <em>read</em>, <em>update</em>, <em>delete</em>.</li>
+<li>🛠️ <strong>Batch operations</strong> like <code>createMany</code> and <code>findMany</code>.</li>
+<li>💡 Abstraction with <code>SnailRepository</code> and straightforward entity mapping.</li>
+</ul>
+<hr>
+<h2 id="-installation">🚀 Installation</h2>
+<p>Add Snail to your project by including it in <code>pubspec.yaml</code>:</p>
+<pre class="language-yaml"><code class="language-yaml">dependencies:
+  snail: ^1.0.3
+</code></pre>
+<p>Install the dependency:</p>
+<pre class="language-bash"><code class="language-bash">flutter pub get
+</code></pre>
+<hr>
+<h2 id="-initial-setup">🛠️ Initial Setup</h2>
+<h3 id="1---define-your-model">1 - <strong>Define Your Model</strong></h3>
+<p>Create a class representing your database entity:</p>
+<pre class="language-dart"><code class="language-dart">class UserModel {
+  final int id;
+  final String name;
+  final String email;
+
+  UserModel({required this.id, required this.name, required this.email});
+
+  Map&lt;String, dynamic&gt; toMap() =&gt; {
+        'id': id,
+        'name': name,
+        'email': email,
+      };
+
+  factory UserModel.fromMap(Map&lt;String, dynamic&gt; map) =&gt; UserModel(
+        id: map['id'],
+        name: map['name'],
+        email: map['email'],
+      );
+}
+</code></pre>
+<hr>
+<h3 id="2---create-the-repository">2 - <strong>Create the Repository</strong></h3>
+<p>Extend the <code>SnailRepository</code> to define your data repository:</p>
+<pre class="language-dart"><code class="language-dart">import 'package:snail/snail.dart';
+import '../models/user_model.dart';
+
+class UserRepository extends SnailRepository&lt;UserModel, int&gt; {
+  UserRepository()
+      : super(
+          tableName: 'users',
+          primaryKeyColumn: 'id',
+          defineFields: {
+            'id': int,
+            'name': String,
+            'email': String,
+          },
+        );
+
+  @override
+  Map&lt;String, dynamic&gt; toMap(UserModel entity) =&gt; entity.toMap();
+
+  @override
+  UserModel fromMap(Map&lt;String, dynamic&gt; map) =&gt; UserModel.fromMap(map);
+}
+</code></pre>
+<hr>
+<h3 id="3---initialize-the-database">3 - <strong>Initialize the Database</strong></h3>
+<p>Configure repositories in the <code>main()</code> function:</p>
+<pre class="language-dart"><code class="language-dart">import 'package:flutter/material.dart';
+import 'package:snail/snail.dart';
+import './repositories/user_repository.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Snail.initialize(
+    repositories: [
+      UserRepository(),
+    ],
+  );
+
+  runApp(AppWidget());
+}
+</code></pre>
+<hr>
+<h2 id="-usage-examples">🎉 <strong>Usage Examples</strong></h2>
+<h3 id="-create-a-new-record">📌 Create a New Record</h3>
+<pre class="language-dart"><code class="language-dart">final userRepo = UserRepository();
+await userRepo.create(UserModel(id: 1, name: 'John Doe', email: 'john@example.com'));
+</code></pre>
+<h3 id="-fetch-a-record-by-id">🔍 Fetch a Record by ID</h3>
+<pre class="language-dart"><code class="language-dart">final user = await userRepo.findOne(1);
+if (user != null) {
+  print('User found: ${user.name}');
+}
+</code></pre>
+<h3 id="-fetch-all-records">📋 Fetch All Records</h3>
+<pre class="language-dart"><code class="language-dart">final users = await userRepo.findMany();
+users.forEach((user) =&gt; print(user.name));
+</code></pre>
+<h3 id="-update-a-record">🛠️ Update a Record</h3>
+<pre class="language-dart"><code class="language-dart">final updatedUser = UserModel(id: 1, name: 'Jane Doe', email: 'jane@example.com');
+await userRepo.update(updatedUser);
+</code></pre>
+<h3 id="-delete-a-record">🗑️ Delete a Record</h3>
+<pre class="language-dart"><code class="language-dart">await userRepo.delete(1);
+</code></pre>
+<h3 id="-create-multiple-records">🚀 Create Multiple Records</h3>
+<pre class="language-dart"><code class="language-dart">await userRepo.createMany([
+  UserModel(id: 2, name: 'Alice', email: 'alice@example.com'),
+  UserModel(id: 3, name: 'Bob', email: 'bob@example.com'),
+]);
+</code></pre>
+<hr>
+<h2 id="-full-api">🧬 <strong>Full API</strong></h2>
+<h3 id="crud-methods">CRUD Methods:</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>create(T entity)</code></td>
+<td>Creates a new record.</td>
+</tr>
+<tr>
+<td><code>createMany(List&lt;T&gt;)</code></td>
+<td>Creates multiple records.</td>
+</tr>
+<tr>
+<td><code>findOne(ID id)</code></td>
+<td>Fetches a record by ID.</td>
+</tr>
+<tr>
+<td><code>findMany()</code></td>
+<td>Fetches all records.</td>
+</tr>
+<tr>
+<td><code>update(T entity)</code></td>
+<td>Updates a record.</td>
+</tr>
+<tr>
+<td><code>updateMany(List&lt;T&gt;)</code></td>
+<td>Updates multiple records.</td>
+</tr>
+<tr>
+<td><code>delete(ID id)</code></td>
+<td>Deletes a record by ID.</td>
+</tr>
+<tr>
+<td><code>deleteMany(List&lt;ID&gt;)</code></td>
+<td>Deletes multiple records.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="-testing">🧪 <strong>Testing</strong></h2>
+<p>A basic unit test example:</p>
+<pre class="language-dart"><code class="language-dart">void main() async {
+  final repo = UserRepository();
+
+  await repo.create(UserModel(id: 1, name: 'Test User', email: 'test@test.com'));
+  final user = await repo.findOne(1);
+
+  assert(user?.name == 'Test User');
+  print('Test passed 🎉');
+}
+</code></pre>
+<hr>
+<h2 id="-contributing">💛 <strong>Contributing</strong></h2>
+<p>Contributions are always welcome! Open an issue or submit a pull request on the GitHub repository.</p>
+<hr>
+<h2 id="-license">📜 <strong>License</strong></h2>
+<p>This project is licensed under the <strong>MIT License</strong>.</p>
+<hr>
+<h2 id="-ready-to-simplify-your-sqlite">🚀 <strong>Ready to Simplify Your SQLite?</strong></h2>
+<p>Boost your productivity with <strong>Snail</strong> and make your SQLite operations simple and efficient! 🐌💨</p>
+<hr>
+<p><strong>Made with ❤️ for Flutter developers!</strong> 🎯</p>
+</section>
+
+
+      <section class="summary">
+          <h2>Libraries</h2>
+        <dl>
+          <dt id="snail">
+  <span class="name"><a href="snail/">snail</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+        </dl>
+      </section>
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="https://github.com/evandersondev/snail">snail package</a></li>
+</ol>
+
+    <h5 class="hidden-xs"><span class="package-name">snail</span> <span class="package-kind">package</span></h5>
+    <ol>
+      <li class="section-title">Libraries</li>
+      <li><a href="snail/">snail</a></li>
+</ol>
+
+  </div>
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div>
+</main>
+<footer>
+  <span class="no-break">
+    snail
+      1.0.3
+  </span>
+  
+</footer>
+
+
+<script src="static-assets/highlight.pack.js?v1"></script>
+<script src="static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+
