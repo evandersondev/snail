@@ -205,20 +205,19 @@ abstract class SnailRepository<T, ID> {
   ///
   /// [entities] is a list of entities to be deleted.
   /// Returns the number of rows affected.
-  Future<int> deleteAll(List<T> entities) async {
-    int deletedCount = 0;
-    for (var entity in entities) {
-      final id = toMap(entity)[primaryKeyColumn];
-      if (id == null) throw ArgumentError('Entity must have a primary key.');
-      deletedCount += await deleteById(id as ID);
+  Future<int> deleteAll(List<T>? entities) async {
+    if (entities != null) {
+      int deletedCount = 0;
+      for (var entity in entities) {
+        final id = toMap(entity)[primaryKeyColumn];
+        if (id == null) throw ArgumentError('Entity must have a primary key.');
+        deletedCount += await deleteById(id as ID);
+      }
+      return deletedCount;
+    } else {
+      final db = await _getDatabase();
+      return await db.delete(tableName);
     }
-    return deletedCount;
-  }
-
-  /// Deletes all entities from the database.
-  Future<int> deleteAllEntities() async {
-    final db = await _getDatabase();
-    return await db.delete(tableName);
   }
 
   ID getEntityId(T entity) {

@@ -23,7 +23,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> initAsync() async {
-    final response = await _respository.findMany();
+    final response = await _respository.findAll();
 
     setState(() {
       users = response;
@@ -35,7 +35,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          await _respository.create(
+          await _respository.save(
             UserModel(
               id: 1,
               name: 'Evnderson',
@@ -56,7 +56,7 @@ class _HomePageState extends State<HomePage> {
             subtitle: Text(users[index].email),
             trailing: IconButton(
               onPressed: () async {
-                await _respository.delete(users[index].id);
+                await _respository.deleteById(users[index].id);
                 await initAsync();
               },
               icon: Icon(Icons.delete),
