@@ -1,3 +1,7 @@
+## [1.1.1] - Readme
+
+- Update documentation.
+
 ## [1.1.0] - SnailRepository
 
 - JPA default methods and dynamic method.

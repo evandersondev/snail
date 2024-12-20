@@ -16,12 +16,12 @@ Add the following dependency to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  snail: ^1.1.0
+  snail: ^1.1.1
 ```
 
-## 🚀 Getting Started
+## Getting Started 🏁
 
-### 🏗️ Creating a Repository
+### Creating a Repository 📦
 
 To create a repository for your model, extend the `SnailRepository` class:
 
@@ -67,7 +67,7 @@ class User {
 }
 ```
 
-### ⚡ Using the Repository
+### Using the Repository 🔧
 
 ```dart
 void main() async {
@@ -87,17 +87,17 @@ void main() async {
 }
 ```
 
-## 🛠️ Dynamic Methods
+## Dynamic Methods 🔍
 
 The `dynamicMethod` allows constructing SQL queries based on the method naming. The naming structure should follow standard conventions:
 
-### 🧱 Naming Structure
+### Naming Structure 🛠️
 
 - **Prefixes**: `find` or `findAll`
 - **Connectors**: `And`, `Or`
 - **Operators**: `Between`, `LessThan`, `GreaterThan`, `Like`, `StartingWith`, `EndingWith`, `Containing`, `In`, `NotIn`, `OrderBy`, `True`, `False`, `IsNull`, `NotNull`
 
-### 📋 Example Naming Conventions
+### Example Naming Conventions 📖
 
 ```dart
 findByTitle(String title);
@@ -123,7 +123,7 @@ findByTitleIsNull();
 findByTitleNotNull();
 ```
 
-### 🛠️ Usage Example
+### Usage Example 📝
 
 ```dart
 Future<List<User>> findByTitleStartingWith(String title) {
@@ -131,57 +131,72 @@ Future<List<User>> findByTitleStartingWith(String title) {
 }
 ```
 
-## 🔄 CRUD Operations
+## CRUD Operations ⚙️
 
-### 💾 Save or Update an Entity
+### Save or Update an Entity 💾
 
 ```dart
 Future<int> save(T entity);
 ```
 
-### 💾 Save or Update Multiple Entities
+### Save or Update Multiple Entities 💾💾
 
 ```dart
 Future<List<int>> saveAll(List<T> entities);
 ```
 
-### 🔍 Find an Entity by ID
+### Find an Entity by ID 🔍
 
 ```dart
 Future<T?> findById(ID id);
 ```
 
-### 🔍 Find All Entities
+### Find All Entities 🔎
 
 ```dart
 Future<List<T>> findAll();
 ```
 
-### ❌ Delete an Entity by ID
+### Delete an Entity by ID 🗑️
 
 ```dart
 Future<int> deleteById(ID id);
 ```
 
-### ❌ Delete All Entities
+### Delete All Entities 🗑️🗑️
 
 ```dart
 Future<int> deleteAll(List<T>? entities);
 ```
 
-### 📊 Count Entities
+### Count Entities 🔢
 
 ```dart
 Future<int> count();
 ```
 
-## 🤝 Contributing
+## Full API 📚
 
-Feel free to fork this repository and contribute by submitting a pull request. 🛠️
+Below is the complete list of methods provided by Snail Repository:
 
-## 📜 License
+| Method                                             | Description                                                      |
+| -------------------------------------------------- | ---------------------------------------------------------------- |
+| `save(T entity)`                                   | Saves or updates an entity in the database.                      |
+| `saveAll(List<T> entities)`                        | Saves or updates multiple entities in the database.              |
+| `findById(ID id)`                                  | Finds an entity by its primary key.                              |
+| `findAll()`                                        | Retrieves all entities from the database.                        |
+| `deleteById(ID id)`                                | Deletes an entity by its primary key.                            |
+| `deleteAll(List<T>? entities)`                     | Deletes all entities or a list of specified entities.            |
+| `count()`                                          | Counts the total number of entities in the database.             |
+| `dynamicMethod(String name, List<Object?> params)` | Executes a query based on the dynamic method naming conventions. |
 
-This project is licensed under the MIT License. 📄
+## Contributing 🤝
+
+Feel free to fork this repository and contribute by submitting a pull request. Your contributions are welcome! 💡
+
+## License 📜
+
+This project is licensed under the MIT License.
 
 ---
 
