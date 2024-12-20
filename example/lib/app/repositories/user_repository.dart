@@ -13,4 +13,10 @@ interface class UserRepository extends SnailRepository<UserModel, int> {
             'email': String,
           },
         );
+
+  @override
+  Map<String, dynamic> toMap(UserModel entity) => entity.toMap();
+
+  @override
+  UserModel fromMap(Map<String, dynamic> map) => UserModel.fromMap(map);
 }

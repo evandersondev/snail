@@ -13,4 +13,10 @@ interface class ProductRepository extends SnailRepository<ProductModel, int> {
             'price': double,
           },
         );
+
+  @override
+  ProductModel fromMap(Map<String, dynamic> map) => ProductModel.fromMap(map);
+
+  @override
+  Map<String, dynamic> toMap(ProductModel entity) => entity.toMap();
 }
