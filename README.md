@@ -2,218 +2,187 @@
 
 **Snail** is a library inspired by Spring Boot's JPA, designed to simplify SQLite database management in Flutter/Dart applications. Easy to use like a snail 🐌 (but as functional as a rocket 🚀)!
 
----
+## ✨ Features
 
-## 🌟 Features
+- ✅ Create, Read, Update, Delete (CRUD) operations.
+- 🔍 Dynamic query methods based on method naming conventions.
+- 🛠️ Table creation based on field definitions.
+- 🔄 Automatic mapping of entities to database rows and vice versa.
+- 🔗 Support for snake_case and camelCase conversions.
 
-- 📦 **Automatic table creation** in SQLite based on repositories.
-- 🔄 Ready-to-use **CRUD methods**: _create_, _read_, _update_, _delete_.
-- 🛠️ **Batch operations** like `createMany` and `findMany`.
-- 💡 Abstraction with `SnailRepository` and straightforward entity mapping.
+## 📥 Installation
 
----
-
-## 🚀 Installation
-
-Add Snail to your project by including it in `pubspec.yaml`:
+Add the following dependency to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  snail: ^1.0.4
+  snail: ^1.0.0
 ```
 
-Install the dependency:
+## 🚀 Getting Started
 
-```bash
-flutter pub get
-```
+### 🏗️ Creating a Repository
 
----
-
-## 🛠️ Initial Setup
-
-### 1 - **Define Your Model**
-
-Create a class representing your database entity:
+To create a repository for your model, extend the `SnailRepository` class:
 
 ```dart
-class UserModel {
-  final int id;
-  final String name;
-  final String email;
+import 'package:snail/snail.dart';
 
-  UserModel({required this.id, required this.name, required this.email});
+class UserRepository extends SnailRepository<User, int> {
+  UserRepository() : super(
+    tableName: 'users',
+    primaryKeyColumn: 'id',
+    defineFields: {
+      'id': int,
+      'name': String,
+      'email': String,
+      'isActive': bool,
+    },
+  );
 
-  Map<String, dynamic> toMap() => {
-        'id': id,
-        'name': name,
-        'email': email,
+  @override
+  Map<String, dynamic> toMap(User entity) => {
+        'id': entity.id,
+        'name': entity.name,
+        'email': entity.email,
+        'isActive': entity.isActive,
       };
 
-  factory UserModel.fromMap(Map<String, dynamic> map) => UserModel(
+  @override
+  User fromMap(Map<String, dynamic> map) => User(
         id: map['id'],
         name: map['name'],
         email: map['email'],
+        isActive: map['isActive'],
       );
 }
-```
 
----
+class User {
+  final int id;
+  final String name;
+  final String email;
+  final bool isActive;
 
-### 2 - **Create the Repository**
-
-Extend the `SnailRepository` to define your data repository:
-
-```dart
-import 'package:snail/snail.dart';
-import '../models/user_model.dart';
-
-class UserRepository extends SnailRepository<UserModel, int> {
-  UserRepository()
-      : super(
-          tableName: 'users',
-          primaryKeyColumn: 'id',
-          defineFields: {
-            'id': int,
-            'name': String,
-            'email': String,
-          },
-        );
-
-  @override
-  Map<String, dynamic> toMap(UserModel entity) => entity.toMap();
-
-  @override
-  UserModel fromMap(Map<String, dynamic> map) => UserModel.fromMap(map);
+  User({required this.id, required this.name, required this.email, required this.isActive});
 }
 ```
 
----
-
-### 3 - **Initialize the Database**
-
-Configure repositories in the `main()` function:
-
-```dart
-import 'package:flutter/material.dart';
-import 'package:snail/snail.dart';
-import './repositories/user_repository.dart';
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  await Snail.initialize(
-    repositories: [
-      UserRepository(),
-    ],
-  );
-
-  runApp(AppWidget());
-}
-```
-
----
-
-## 🎉 **Usage Examples**
-
-### 📌 Create a New Record
-
-```dart
-final userRepo = UserRepository();
-await userRepo.create(UserModel(id: 1, name: 'John Doe', email: 'john@example.com'));
-```
-
-### 🔍 Fetch a Record by ID
-
-```dart
-final user = await userRepo.findOne(1);
-if (user != null) {
-  print('User found: ${user.name}');
-}
-```
-
-### 📋 Fetch All Records
-
-```dart
-final users = await userRepo.findMany();
-users.forEach((user) => print(user.name));
-```
-
-### 🛠️ Update a Record
-
-```dart
-final updatedUser = UserModel(id: 1, name: 'Jane Doe', email: 'jane@example.com');
-await userRepo.update(updatedUser);
-```
-
-### 🗑️ Delete a Record
-
-```dart
-await userRepo.delete(1);
-```
-
-### 🚀 Create Multiple Records
-
-```dart
-await userRepo.createMany([
-  UserModel(id: 2, name: 'Alice', email: 'alice@example.com'),
-  UserModel(id: 3, name: 'Bob', email: 'bob@example.com'),
-]);
-```
-
----
-
-## 🧬 **Full API**
-
-### CRUD Methods:
-
-| Method                 | Description               |
-| ---------------------- | ------------------------- |
-| `create(T entity)`     | Creates a new record.     |
-| `createMany(List<T>)`  | Creates multiple records. |
-| `findOne(ID id)`       | Fetches a record by ID.   |
-| `findMany()`           | Fetches all records.      |
-| `update(T entity)`     | Updates a record.         |
-| `updateMany(List<T>)`  | Updates multiple records. |
-| `delete(ID id)`        | Deletes a record by ID.   |
-| `deleteMany(List<ID>)` | Deletes multiple records. |
-
----
-
-## 🧪 **Testing**
-
-A basic unit test example:
+### ⚡ Using the Repository
 
 ```dart
 void main() async {
-  final repo = UserRepository();
+  final userRepository = UserRepository();
 
-  await repo.create(UserModel(id: 1, name: 'Test User', email: 'test@test.com'));
-  final user = await repo.findOne(1);
+  // Save a user
+  await userRepository.save(User(id: 1, name: 'John Doe', email: 'john@example.com', isActive: true));
 
-  assert(user?.name == 'Test User');
-  print('Test passed 🎉');
+  // Find a user by ID
+  final user = await userRepository.findById(1);
+
+  // Find all users
+  final users = await userRepository.findAll();
+
+  // Delete a user
+  await userRepository.deleteById(1);
 }
 ```
 
+## 🛠️ Dynamic Methods
+
+The `dynamicMethod` allows constructing SQL queries based on the method naming. The naming structure should follow standard conventions:
+
+### 🧱 Naming Structure
+
+- **Prefixes**: `find` or `findAll`
+- **Connectors**: `And`, `Or`
+- **Operators**: `Between`, `LessThan`, `GreaterThan`, `Like`, `StartingWith`, `EndingWith`, `Containing`, `In`, `NotIn`, `OrderBy`, `True`, `False`, `IsNull`, `NotNull`
+
+### 📋 Example Naming Conventions
+
+```dart
+findByTitle(String title);
+findById(int id);
+findByTitleAndDescription(String title, String description);
+findByTitleOrDescription(String title, String description);
+findByTitleStartingWith(String title);
+findByTitleEndingWith(String title);
+findByTitleContaining(String title);
+findByIdLessThan(int id);
+findByIdGreaterThan(int id);
+findByDateBetween(DateTime startDate, DateTime endDate);
+findByTitleStartingWithAndIdLessThan(String title, int id);
+findByTitleContainingOrDescriptionLike(String title, String description);
+findByIdIn(List<int> ids);
+findByIdNotIn(List<int> ids);
+findByTitleOrderByDate(String title);
+findByTitleOrderByDateDesc(String title);
+findByTitleAndDescriptionOrderByDate(String title, String description);
+findByIsActiveTrue();
+findByIsActiveFalse();
+findByTitleIsNull();
+findByTitleNotNull();
+```
+
+### 🛠️ Usage Example
+
+```dart
+Future<List<User>> findByTitleStartingWith(String title) {
+  return dynamicMethod('findByTitleStartingWith', [title]);
+}
+```
+
+## 🔄 CRUD Operations
+
+### 💾 Save or Update an Entity
+
+```dart
+Future<int> save(T entity);
+```
+
+### 💾 Save or Update Multiple Entities
+
+```dart
+Future<List<int>> saveAll(List<T> entities);
+```
+
+### 🔍 Find an Entity by ID
+
+```dart
+Future<T?> findById(ID id);
+```
+
+### 🔍 Find All Entities
+
+```dart
+Future<List<T>> findAll();
+```
+
+### ❌ Delete an Entity by ID
+
+```dart
+Future<int> deleteById(ID id);
+```
+
+### ❌ Delete All Entities
+
+```dart
+Future<int> deleteAll(List<T>? entities);
+```
+
+### 📊 Count Entities
+
+```dart
+Future<int> count();
+```
+
+## 🤝 Contributing
+
+Feel free to fork this repository and contribute by submitting a pull request. 🛠️
+
+## 📜 License
+
+This project is licensed under the MIT License. 📄
+
 ---
 
-## 💛 **Contributing**
-
-Contributions are always welcome! Open an issue or submit a pull request on the GitHub repository.
-
----
-
-## 📜 **License**
-
-This project is licensed under the **MIT License**.
-
----
-
-## 🚀 **Ready to Simplify Your SQLite?**
-
-Boost your productivity with **Snail** and make your SQLite operations simple and efficient! 🐌💨
-
----
-
-**Made with ❤️ for Flutter developers!** 🎯
+Made with ❤️ for Flutter developers! 🎯

@@ -22,6 +22,7 @@ abstract class SnailRepository<T, ID> {
     required this.defineFields,
   });
 
+  /// Gets the database instance.
   Future<Database> _getDatabase() async {
     return await Snail.getDatabase();
   }
@@ -31,7 +32,7 @@ abstract class SnailRepository<T, ID> {
   /// This method converts the field definitions into a valid SQL CREATE TABLE statement.
   String generateCreateTableQuery() {
     final fieldDefinitions = defineFields.entries
-        .map((entry) => '${entry.key} ${_typeToSql(entry.value)}')
+        .map((entry) => '${toSnakeCase(entry.key)} ${_typeToSql(entry.value)}')
         .join(', ');
 
     return '''
@@ -56,25 +57,6 @@ abstract class SnailRepository<T, ID> {
       return 'BLOB';
     }
   }
-
-  final Map<String, String> _operators = {
-    'And': 'AND',
-    'Or': 'OR',
-    'Between': 'BETWEEN',
-    'LessThan': '<',
-    'GreaterThan': '>',
-    'Like': 'LIKE',
-    'StartingWith': 'LIKE',
-    'EndingWith': 'LIKE',
-    'Containing': 'LIKE',
-    'In': 'IN',
-    'NotIn': 'NOT IN',
-    'OrderBy': 'ORDER BY',
-    'True': '= 1',
-    'False': '= 0',
-    'IsNull': 'IS NULL',
-    'NotNull': 'IS NOT NULL',
-  };
 
   // CRUD Operations
 
@@ -142,7 +124,7 @@ abstract class SnailRepository<T, ID> {
       whereArgs: [id],
     );
     if (result.isNotEmpty) {
-      return fromMap(result.first);
+      return mapValueToEntity(result.first);
     }
     return null;
   }
@@ -151,7 +133,7 @@ abstract class SnailRepository<T, ID> {
   Future<List<T>> findAll() async {
     final db = await _getDatabase();
     var result = await db.query(tableName);
-    return result.map((e) => fromMap(e)).toList();
+    return result.map((e) => mapValueToEntity(e)).toList();
   }
 
   /// Finds all entities by their IDs.
@@ -163,7 +145,7 @@ abstract class SnailRepository<T, ID> {
           '$primaryKeyColumn IN (${List.filled(ids.length, '?').join(', ')})',
       whereArgs: ids,
     );
-    return result.map((e) => fromMap(e)).toList();
+    return result.map((e) => mapValueToEntity(e)).toList();
   }
 
   /// Checks if an entity exists by its ID.
@@ -220,71 +202,43 @@ abstract class SnailRepository<T, ID> {
     }
   }
 
+  /// Gets the primary key value of an entity.
   ID getEntityId(T entity) {
     final map = toMap(entity);
     return map[primaryKeyColumn] as ID;
   }
 
-  /// Converts an entity of type [T] to a map that can be inserted into the database.
-  ///
-  /// This method must be implemented by subclasses to define how an entity is
-  /// converted to a map representation.
-  Map<String, dynamic> toMap(T entity) {
-    final map = <String, dynamic>{};
+  /// Converts an entity of type [T] to a map representation.
+  Map<String, dynamic> toMap(T entity);
 
-    defineFields.forEach((key, type) {
-      final value =
-          entityToMapValue(entity); // Implementação depende do seu modelo.
-      map[key] = type == bool ? _boolToInt(value as bool) : value;
-    });
-
-    return map;
-  }
-
-  /// Converts a map from the database to an entity of type [T].
-  ///
-  /// This method must be implemented by subclasses to define how a map is
-  /// converted back to an entity.
-  T fromMap(Map<String, dynamic> map) {
-    final entity =
-        createEmptyEntity(); // Método para criar uma instância vazia.
-
-    defineFields.forEach((key, type) {
-      final value = map[key];
-      final parsedValue = type == bool ? _intToBool(value as int) : value;
-      mapValueToEntity(
-          entity, key, parsedValue); // Implementação depende do seu modelo.
-    });
-
-    return entity;
-  }
-
+  /// Converts an entity of type [T] to a map with values ready for database storage.
   Map<String, dynamic> entityToMapValue(T entity) {
     final map = toMap(entity);
 
-    // Converte valores booleanos para 0 e 1, se necessário
+    // Converts boolean values to 0 and 1, if necessary
     final convertedMap = map.map((key, value) {
       if (value is bool) {
-        return MapEntry(key, value ? 1 : 0); // True -> 1, False -> 0
+        return MapEntry(key, _boolToInt(value)); // True -> 1, False -> 0
       }
       return MapEntry(key, value);
     });
 
-    return convertedMap;
+    return keysToSnakeCase(convertedMap);
   }
 
-  T createEmptyEntity() {
-    throw UnimplementedError(
-        'Subclasses must implement createEmptyEntity to provide an empty instance of T');
-  }
+  /// Converts a map to an entity of type [T].
+  T fromMap(Map<String, dynamic> map);
 
-  void mapValueToEntity(T entity, String key, dynamic value) {
-    // Aqui você deve implementar a lógica para atribuir o valor ao campo correspondente na entidade.
-    // Essa implementação dependerá de como sua entidade é estruturada.
-    // Por exemplo:
-    final fieldSetter = entity as dynamic;
-    fieldSetter[key] =
-        value; // Isso funciona se a entidade for dinâmica ou usar reflection.
+  /// Converts a map from the database to an entity of type [T].
+  T mapValueToEntity(Map<String, dynamic> map) {
+    final convertedMap = map.map((key, value) {
+      if (value is int) {
+        return MapEntry(key, _intToBool(value)); // True -> 1, False -> 0
+      }
+      return MapEntry(key, value);
+    });
+
+    return fromMap(keysToCamelCase(convertedMap));
   }
 
   /// Converts a boolean value to an integer representation for database storage.
@@ -301,77 +255,151 @@ abstract class SnailRepository<T, ID> {
   ///
   /// [methodName] is the method name following the naming conventions.
   /// [parameters] is a list of parameters that match the placeholders in the query.
-  Future<List<T>>? parseMethod(
-      String methodName, List<dynamic> parameters) async {
-    if (!methodName.startsWith('findBy')) {
-      throw ArgumentError('Method name must start with "findBy".');
+  Future<List<T>> dynamicMethod(String methodName,
+      [List<dynamic>? args]) async {
+    final db = await _getDatabase();
+    final regex = RegExp(r'^(find|findAll)(Where|By)?(.*)$');
+    final match = regex.firstMatch(methodName);
+    if (match == null) {
+      throw UnimplementedError("Method $methodName not implemented");
     }
 
-    // Remove the "findBy" prefix
-    String conditions = methodName.substring(6);
+    final conditions = match.group(3)!;
 
-    // Tokenize conditions based on the connectors (And, Or, etc.)
-    final tokens = _tokenize(conditions);
-    if (tokens.isEmpty) {
-      throw ArgumentError('No valid conditions found in the method name.');
-    }
+    String query = 'SELECT * FROM $tableName';
+    List<String> whereClauses = [];
+    List<dynamic> whereArgs = [];
 
-    // Validate and convert tokens to SQL-like query
-    final queryBuilder = StringBuffer();
-    int paramIndex = 0;
+    if (conditions.isNotEmpty) {
+      final conditionRegex = RegExp(
+          r'(And|Or)?(\w+?)(Between|LessThan|GreaterThan|Like|StartingWith|EndingWith|Containing|In|NotIn|OrderBy|True|False|IsNull|NotNull)?$');
+      for (final conditionMatch in conditionRegex.allMatches(conditions)) {
+        final operator = conditionMatch.group(1) ?? 'And';
+        final field = toSnakeCase(conditionMatch.group(2)!);
+        final comparator = conditionMatch.group(3);
 
-    for (final token in tokens) {
-      if (_operators.containsKey(token)) {
-        // Add SQL operator
-        queryBuilder.write(' ${_operators[token]} ');
-      } else {
-        // Check if there are more parameters for the current token
-        if (paramIndex >= parameters.length && !_isUnaryOperator(token)) {
-          throw ArgumentError(
-              'Insufficient parameters provided for the method name.');
+        if (!keysToSnakeCase(defineFields).containsKey(field)) {
+          throw ArgumentError("Field $field not defined in table schema");
         }
 
-        // Handle different conditions
-        if (token == 'Between') {
-          queryBuilder.write(
-              '${parameters[paramIndex]} BETWEEN ? AND ?'); // Assumes 2 params
-          paramIndex += 2;
-        } else if (token == 'StartingWith') {
-          queryBuilder.write("'${parameters[paramIndex]}%'");
-          paramIndex++;
-        } else if (token == 'EndingWith') {
-          queryBuilder.write("'%'${parameters[paramIndex]}'");
-          paramIndex++;
-        } else if (token == 'Containing') {
-          queryBuilder.write("'%'${parameters[paramIndex]}%'");
-          paramIndex++;
-        } else if (_isUnaryOperator(token)) {
-          queryBuilder.write(token); // True, False, IsNull, NotNull
-        } else {
-          queryBuilder.write('${parameters[paramIndex]} ${_operators[token]}');
-          paramIndex++;
+        final not = comparator != null && comparator.startsWith('Not');
+        String clause;
+        switch (comparator) {
+          case 'Between':
+            clause =
+                not ? '$field NOT BETWEEN ? AND ?' : '$field BETWEEN ? AND ?';
+            whereArgs.addAll(args!.sublist(
+                whereClauses.length * 2, (whereClauses.length + 1) * 2));
+            break;
+          case 'LessThan':
+            clause = not ? '$field >= ?' : '$field < ?';
+            whereArgs.add(args![whereClauses.length]);
+            break;
+          case 'GreaterThan':
+            clause = not ? '$field <= ?' : '$field > ?';
+            whereArgs.add(args![whereClauses.length]);
+            break;
+          case 'Like':
+            clause = not ? '$field NOT LIKE ?' : '$field LIKE ?';
+            whereArgs.add(args![whereClauses.length]);
+            break;
+          case 'StartingWith':
+            clause = not ? '$field NOT LIKE ?' : '$field LIKE ?';
+            whereArgs.add('${args![whereClauses.length]}%');
+            break;
+          case 'EndingWith':
+            clause = not ? '$field NOT LIKE ?' : '$field LIKE ?';
+            whereArgs.add('%${args![whereClauses.length]}');
+            break;
+          case 'Containing':
+            clause = not ? '$field NOT LIKE ?' : '$field LIKE ?';
+            whereArgs.add('%${args![whereClauses.length]}%');
+            break;
+          case 'In':
+            clause = not
+                ? '$field NOT IN (${List.filled(args!.length, '?').join(', ')})'
+                : '$field IN (${List.filled(args!.length, '?').join(', ')})';
+            whereArgs.addAll(args);
+            break;
+          case 'NotIn':
+            clause = not
+                ? '$field IN (${List.filled(args!.length, '?').join(', ')})'
+                : '$field NOT IN (${List.filled(args!.length, '?').join(', ')})';
+            whereArgs.addAll(args);
+            break;
+          case 'OrderBy':
+            clause = '';
+            query += ' ORDER BY $field ${not ? 'DESC' : 'ASC'}';
+            break;
+          case 'True':
+            clause = '$field = 1';
+            break;
+          case 'False':
+            clause = '$field = 0';
+            break;
+          case 'IsNull':
+            clause = '$field IS NULL';
+            break;
+          case 'NotNull':
+            clause = '$field IS NOT NULL';
+            break;
+          default:
+            clause = not ? '$field != ?' : '$field = ?';
+            whereArgs.add(args![whereClauses.length]);
+        }
+
+        if (clause.isNotEmpty) {
+          if (operator == 'And' && whereClauses.isNotEmpty) {
+            whereClauses.add('AND $clause');
+          } else if (operator == 'Or' && whereClauses.isNotEmpty) {
+            whereClauses.add('OR $clause');
+          } else {
+            whereClauses.add(clause);
+          }
         }
       }
     }
 
-    final db = await _getDatabase();
-    var result = await db.rawQuery(queryBuilder.toString());
-    return result.map((e) => fromMap(e)).toList();
+    if (whereClauses.isNotEmpty) {
+      query += ' WHERE ${whereClauses.join(' ')}';
+    }
+
+    final result = await db.rawQuery(query, whereArgs);
+    return result.map((e) => mapValueToEntity(e)).toList();
   }
 
-  /// Tokenizes the conditions part of the method name.
-  static List<String> _tokenize(String conditions) {
-    final regex = RegExp(
-        r'(And|Or|Between|LessThan|GreaterThan|Like|StartingWith|EndingWith|Containing|In|NotIn|OrderBy|True|False|IsNull|NotNull)');
-    final matches = regex.allMatches(conditions);
-    return matches.map((match) => match.group(0)!).toList();
+  /// Converts a string from camelCase to snake_case.
+  String toSnakeCase(String input) {
+    if (input.isEmpty) return input;
+    StringBuffer buffer = StringBuffer();
+    for (int i = 0; i < input.length; i++) {
+      if (i > 0 && input[i].toUpperCase() == input[i]) {
+        buffer.write('_');
+      }
+      buffer.write(input[i].toLowerCase());
+    }
+    return buffer.toString();
   }
 
-  /// Checks if the operator is unary (requires no parameters).
-  static bool _isUnaryOperator(String operator) {
-    return operator == 'True' ||
-        operator == 'False' ||
-        operator == 'IsNull' ||
-        operator == 'NotNull';
+  /// Converts a string from snake_case to camelCase.
+  String toCamelCase(String input) {
+    final regex = RegExp(r'_([a-z])');
+    return input.replaceAllMapped(regex, (Match match) {
+      return match.group(1)!.toUpperCase();
+    });
+  }
+
+  /// Converts the keys of a given Map from camelCase to snake_case.
+  Map<String, dynamic> keysToSnakeCase(Map<String, dynamic> map) {
+    return map.map((key, value) {
+      return MapEntry(toSnakeCase(key), value);
+    });
+  }
+
+  /// Converts the keys of a given Map from snake_case to camelCase.
+  Map<String, dynamic> keysToCamelCase(Map<String, dynamic> map) {
+    return map.map((key, value) {
+      return MapEntry(toCamelCase(key), value);
+    });
   }
 }

@@ -24,6 +24,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> initAsync() async {
     final response = await _respository.findAll();
+    // final response = await _respository.findByIsCompletedFalse();
 
     setState(() {
       todos = response;
@@ -33,6 +34,9 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Todo List'),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           if (_todoController.text.isEmpty) {
@@ -68,7 +72,17 @@ class _HomePageState extends State<HomePage> {
                 itemCount: todos.length,
                 itemBuilder: (context, index) {
                   return ListTile(
-                    title: Text(todos[index].title),
+                    title: Text(
+                      todos[index].title,
+                      style: TextStyle(
+                        decoration: todos[index].isCompleted
+                            ? TextDecoration.lineThrough
+                            : TextDecoration.none,
+                        color: todos[index].isCompleted
+                            ? Colors.grey
+                            : Colors.black,
+                      ),
+                    ),
                     trailing: IconButton(
                       onPressed: () async {
                         await _respository.deleteById(todos[index].id);

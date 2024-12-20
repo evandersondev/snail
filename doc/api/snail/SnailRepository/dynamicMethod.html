@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the dynamicMethod method from the SnailRepository class, for the Dart programming language.">
+  <title>dynamicMethod method - SnailRepository class - snail library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">snail</a></li>
+    <li><a href="../../snail/">snail.dart</a></li>
+    <li><a href="../../snail/SnailRepository-class.html">SnailRepository<span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">ID</span>&gt;</span></a></li>
+    <li class="self-crumb">dynamicMethod method</li>
+  </ol>
+  <div class="self-name">dynamicMethod</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button" title="Toggle brightness">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span id="dark-theme-button" class="material-symbols-outlined">
+        dark_mode
+      </span>
+      <span id="light-theme-button" class="material-symbols-outlined">
+        light_mode
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="snail&#47;SnailRepository-class-sidebar.html"
+    data-below-sidebar="">
+    <div>
+<h1><span class="kind-method">dynamicMethod</span> method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span></span>&gt;</span></span>
+<span class="name ">dynamicMethod</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="dynamicMethod-param-methodName"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">methodName</span>, [</span></li>
+<li><span class="parameter" id="dynamicMethod-param-args"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a>?</span> <span class="parameter-name">args</span></span></li>
+</ol>])
+
+      
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Parses the method name and constructs a query fragment.</p>
+<p><code>methodName</code> is the method name following the naming conventions.
+<code>parameters</code> is a list of parameters that match the placeholders in the query.</p>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">Future&lt;List&lt;T&gt;&gt; dynamicMethod(String methodName,
+    [List&lt;dynamic&gt;? args]) async {
+  final db = await _getDatabase();
+  final regex = RegExp(r&#39;^(find|findAll)(Where|By)?(.*)$&#39;);
+  final match = regex.firstMatch(methodName);
+  if (match == null) {
+    throw UnimplementedError(&quot;Method $methodName not implemented&quot;);
+  }
+
+  final conditions = match.group(3)!;
+
+  String query = &#39;SELECT * FROM $tableName&#39;;
+  List&lt;String&gt; whereClauses = [];
+  List&lt;dynamic&gt; whereArgs = [];
+
+  if (conditions.isNotEmpty) {
+    final conditionRegex = RegExp(
+        r&#39;(And|Or)?(\w+?)(Between|LessThan|GreaterThan|Like|StartingWith|EndingWith|Containing|In|NotIn|OrderBy|True|False|IsNull|NotNull)?$&#39;);
+    for (final conditionMatch in conditionRegex.allMatches(conditions)) {
+      final operator = conditionMatch.group(1) ?? &#39;And&#39;;
+      final field = toSnakeCase(conditionMatch.group(2)!);
+      final comparator = conditionMatch.group(3);
+
+      if (!keysToSnakeCase(defineFields).containsKey(field)) {
+        throw ArgumentError(&quot;Field $field not defined in table schema&quot;);
+      }
+
+      final not = comparator != null &amp;&amp; comparator.startsWith(&#39;Not&#39;);
+      String clause;
+      switch (comparator) {
+        case &#39;Between&#39;:
+          clause =
+              not ? &#39;$field NOT BETWEEN ? AND ?&#39; : &#39;$field BETWEEN ? AND ?&#39;;
+          whereArgs.addAll(args!.sublist(
+              whereClauses.length * 2, (whereClauses.length + 1) * 2));
+          break;
+        case &#39;LessThan&#39;:
+          clause = not ? &#39;$field &gt;= ?&#39; : &#39;$field &lt; ?&#39;;
+          whereArgs.add(args![whereClauses.length]);
+          break;
+        case &#39;GreaterThan&#39;:
+          clause = not ? &#39;$field &lt;= ?&#39; : &#39;$field &gt; ?&#39;;
+          whereArgs.add(args![whereClauses.length]);
+          break;
+        case &#39;Like&#39;:
+          clause = not ? &#39;$field NOT LIKE ?&#39; : &#39;$field LIKE ?&#39;;
+          whereArgs.add(args![whereClauses.length]);
+          break;
+        case &#39;StartingWith&#39;:
+          clause = not ? &#39;$field NOT LIKE ?&#39; : &#39;$field LIKE ?&#39;;
+          whereArgs.add(&#39;${args![whereClauses.length]}%&#39;);
+          break;
+        case &#39;EndingWith&#39;:
+          clause = not ? &#39;$field NOT LIKE ?&#39; : &#39;$field LIKE ?&#39;;
+          whereArgs.add(&#39;%${args![whereClauses.length]}&#39;);
+          break;
+        case &#39;Containing&#39;:
+          clause = not ? &#39;$field NOT LIKE ?&#39; : &#39;$field LIKE ?&#39;;
+          whereArgs.add(&#39;%${args![whereClauses.length]}%&#39;);
+          break;
+        case &#39;In&#39;:
+          clause = not
+              ? &#39;$field NOT IN (${List.filled(args!.length, &#39;?&#39;).join(&#39;, &#39;)})&#39;
+              : &#39;$field IN (${List.filled(args!.length, &#39;?&#39;).join(&#39;, &#39;)})&#39;;
+          whereArgs.addAll(args);
+          break;
+        case &#39;NotIn&#39;:
+          clause = not
+              ? &#39;$field IN (${List.filled(args!.length, &#39;?&#39;).join(&#39;, &#39;)})&#39;
+              : &#39;$field NOT IN (${List.filled(args!.length, &#39;?&#39;).join(&#39;, &#39;)})&#39;;
+          whereArgs.addAll(args);
+          break;
+        case &#39;OrderBy&#39;:
+          clause = &#39;&#39;;
+          query += &#39; ORDER BY $field ${not ? &#39;DESC&#39; : &#39;ASC&#39;}&#39;;
+          break;
+        case &#39;True&#39;:
+          clause = &#39;$field = 1&#39;;
+          break;
+        case &#39;False&#39;:
+          clause = &#39;$field = 0&#39;;
+          break;
+        case &#39;IsNull&#39;:
+          clause = &#39;$field IS NULL&#39;;
+          break;
+        case &#39;NotNull&#39;:
+          clause = &#39;$field IS NOT NULL&#39;;
+          break;
+        default:
+          clause = not ? &#39;$field != ?&#39; : &#39;$field = ?&#39;;
+          whereArgs.add(args![whereClauses.length]);
+      }
+
+      if (clause.isNotEmpty) {
+        if (operator == &#39;And&#39; &amp;&amp; whereClauses.isNotEmpty) {
+          whereClauses.add(&#39;AND $clause&#39;);
+        } else if (operator == &#39;Or&#39; &amp;&amp; whereClauses.isNotEmpty) {
+          whereClauses.add(&#39;OR $clause&#39;);
+        } else {
+          whereClauses.add(clause);
+        }
+      }
+    }
+  }
+
+  if (whereClauses.isNotEmpty) {
+    query += &#39; WHERE ${whereClauses.join(&#39; &#39;)}&#39;;
+  }
+
+  final result = await db.rawQuery(query, whereArgs);
+  return result.map((e) =&gt; mapValueToEntity(e)).toList();
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">snail</a></li>
+    <li><a href="../../snail/">snail</a></li>
+    <li><a href="../../snail/SnailRepository-class.html">SnailRepository<span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">ID</span>&gt;</span></a></li>
+    <li class="self-crumb">dynamicMethod method</li>
+</ol>
+
+    <h5>SnailRepository class</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-->
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+</div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    snail
+      1.1.0
+  </span>
+  
+</footer>
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+
