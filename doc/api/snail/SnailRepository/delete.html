@@ -58,7 +58,7 @@
     <section class="multi-line-signature">
       
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
-<span class="name ">delete</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="delete-param-id"><span class="type-annotation">ID</span> <span class="parameter-name">id</span></span></li>
+<span class="name ">delete</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="delete-param-entity"><span class="type-annotation">T</span> <span class="parameter-name">entity</span></span></li>
 </ol>)
 
       
@@ -66,23 +66,17 @@
     </section>
     
 <section class="desc markdown">
-  <p>Deletes an item by its ID from the database.</p>
-<p><code>id</code> is the primary key value of the item to be deleted.
-Returns the number of rows affected.</p>
+  <p>Deletes an entity from the database.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; delete(ID id) async {
-  final db = await _getDatabase();
-  var result = await db.delete(
-    tableName,
-    where: &#39;$primaryKeyColumn = ?&#39;,
-    whereArgs: [id],
-  );
-  return result;
+  <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; delete(T entity) async {
+  final id = toMap(entity)[primaryKeyColumn];
+  if (id == null) throw ArgumentError(&#39;Entity must have a primary key.&#39;);
+  return await deleteById(id as ID);
 }</code></pre>
 </section>
 
@@ -111,7 +105,7 @@ Returns the number of rows affected.</p>
 <footer>
   <span class="no-break">
     snail
-      1.0.3
+      1.1.0
   </span>
   
 </footer>

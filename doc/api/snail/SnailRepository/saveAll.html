@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the defineFields property from the SnailRepository class, for the Dart programming language.">
-  <title>defineFields property - SnailRepository class - snail library - Dart API</title>
+  <meta name="description" content="API docs for the saveAll method from the SnailRepository class, for the Dart programming language.">
+  <title>saveAll method - SnailRepository class - snail library - Dart API</title>
 
 
   
@@ -27,9 +27,9 @@
     <li><a href="../../index.html">snail</a></li>
     <li><a href="../../snail/">snail.dart</a></li>
     <li><a href="../../snail/SnailRepository-class.html">SnailRepository<span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">ID</span>&gt;</span></a></li>
-    <li class="self-crumb">defineFields property</li>
+    <li class="self-crumb">saveAll method</li>
   </ol>
-  <div class="self-name">defineFields</div>
+  <div class="self-name">saveAll</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -52,30 +52,59 @@
     data-above-sidebar="snail&#47;SnailRepository-class-sidebar.html"
     data-below-sidebar="">
     <div>
-<h1><span class="kind-property">defineFields</span> property 
+<h1><span class="kind-method">saveAll</span> method 
 </h1></div>
 
+    <section class="multi-line-signature">
+      
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>&gt;</span></span>
+<span class="name ">saveAll</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="saveAll-param-entities"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span></span> <span class="parameter-name">entities</span></span></li>
+</ol>)
+
+      
+
+    </section>
     
-      <section class="multi-line-signature">
-        
-        <a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a></span>&gt;</span>
-        <span class="name ">defineFields</span>
-        <div class="features"><span class="feature">final</span></div>
-
-      </section>
-      
-
-      
-<section class="summary source-code" id="source">
-  <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final Map&lt;String, Type&gt; defineFields;</code></pre>
+<section class="desc markdown">
+  <p>Saves or updates a list of entities in the database.</p>
+<p>For each entity, if it exists (based on its primary key), it will be updated; otherwise, it will be inserted.</p>
 </section>
 
 
     
-</div> <!-- /.main-content -->
-<div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
-  <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">Future&lt;List&lt;int&gt;&gt; saveAll(List&lt;T&gt; entities) async {
+  final db = await _getDatabase();
+  List&lt;int&gt; results = [];
+
+  for (var entity in entities) {
+    final id = getEntityId(entity);
+    final exists = await existsById(id);
+
+    final map = entityToMapValue(entity);
+
+    if (exists) {
+      await db.update(
+        tableName,
+        map,
+        where: &#39;$primaryKeyColumn = ?&#39;,
+        whereArgs: [id],
+      );
+    } else {
+      final insertedId = await db.insert(tableName, map);
+      results.add(insertedId);
+    }
+  }
+
+  return results;
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
 <header id="header-search-sidebar" class="hidden-l">
   <form class="search-sidebar" role="search">
     <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
@@ -85,13 +114,13 @@
     <li><a href="../../index.html">snail</a></li>
     <li><a href="../../snail/">snail</a></li>
     <li><a href="../../snail/SnailRepository-class.html">SnailRepository<span class="signature">&lt;<wbr><span class="type-parameter">T</span>, <span class="type-parameter">ID</span>&gt;</span></a></li>
-    <li class="self-crumb">defineFields property</li>
+    <li class="self-crumb">saveAll method</li>
 </ol>
 
-  <h5>SnailRepository class</h5>
-  <div id="dartdoc-sidebar-left-content"></div>
-</div><!--/.sidebar-offcanvas-->
-<div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+    <h5>SnailRepository class</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-->
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
 </div><!--/.sidebar-offcanvas-->
 </main>
 <footer>

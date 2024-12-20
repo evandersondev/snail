@@ -1,3 +1,7 @@
+## [1.1.0] - SnailRepository
+
+- JPA default methods.
+
 ## [1.0.4] - Pubspec
 
 - Update pubspec.

@@ -48,189 +48,143 @@
 <section class="desc markdown">
   <h1 id="-snail-a-simple-orm-like-library-for-flutterdart-">🐌 Snail: A Simple ORM-like Library for Flutter/Dart 🐦</h1>
 <p><strong>Snail</strong> is a library inspired by Spring Boot's JPA, designed to simplify SQLite database management in Flutter/Dart applications. Easy to use like a snail 🐌 (but as functional as a rocket 🚀)!</p>
-<hr>
-<h2 id="-features">🌟 Features</h2>
+<h2 id="-features">✨ Features</h2>
 <ul>
-<li>📦 <strong>Automatic table creation</strong> in SQLite based on repositories.</li>
-<li>🔄 Ready-to-use <strong>CRUD methods</strong>: <em>create</em>, <em>read</em>, <em>update</em>, <em>delete</em>.</li>
-<li>🛠️ <strong>Batch operations</strong> like <code>createMany</code> and <code>findMany</code>.</li>
-<li>💡 Abstraction with <code>SnailRepository</code> and straightforward entity mapping.</li>
+<li>✅ Create, Read, Update, Delete (CRUD) operations.</li>
+<li>🔍 Dynamic query methods based on method naming conventions.</li>
+<li>🛠️ Table creation based on field definitions.</li>
+<li>🔄 Automatic mapping of entities to database rows and vice versa.</li>
+<li>🔗 Support for snake_case and camelCase conversions.</li>
 </ul>
-<hr>
-<h2 id="-installation">🚀 Installation</h2>
-<p>Add Snail to your project by including it in <code>pubspec.yaml</code>:</p>
+<h2 id="-installation">📥 Installation</h2>
+<p>Add the following dependency to your <code>pubspec.yaml</code>:</p>
 <pre class="language-yaml"><code class="language-yaml">dependencies:
-  snail: ^1.0.3
+  snail: ^1.0.0
 </code></pre>
-<p>Install the dependency:</p>
-<pre class="language-bash"><code class="language-bash">flutter pub get
-</code></pre>
-<hr>
-<h2 id="-initial-setup">🛠️ Initial Setup</h2>
-<h3 id="1---define-your-model">1 - <strong>Define Your Model</strong></h3>
-<p>Create a class representing your database entity:</p>
-<pre class="language-dart"><code class="language-dart">class UserModel {
-  final int id;
-  final String name;
-  final String email;
+<h2 id="-getting-started">🚀 Getting Started</h2>
+<h3 id="-creating-a-repository">🏗️ Creating a Repository</h3>
+<p>To create a repository for your model, extend the <code>SnailRepository</code> class:</p>
+<pre class="language-dart"><code class="language-dart">import 'package:snail/snail.dart';
 
-  UserModel({required this.id, required this.name, required this.email});
+class UserRepository extends SnailRepository&lt;User, int&gt; {
+  UserRepository() : super(
+    tableName: 'users',
+    primaryKeyColumn: 'id',
+    defineFields: {
+      'id': int,
+      'name': String,
+      'email': String,
+      'isActive': bool,
+    },
+  );
 
-  Map&lt;String, dynamic&gt; toMap() =&gt; {
-        'id': id,
-        'name': name,
-        'email': email,
+  @override
+  Map&lt;String, dynamic&gt; toMap(User entity) =&gt; {
+        'id': entity.id,
+        'name': entity.name,
+        'email': entity.email,
+        'isActive': entity.isActive,
       };
 
-  factory UserModel.fromMap(Map&lt;String, dynamic&gt; map) =&gt; UserModel(
+  @override
+  User fromMap(Map&lt;String, dynamic&gt; map) =&gt; User(
         id: map['id'],
         name: map['name'],
         email: map['email'],
+        isActive: map['isActive'],
       );
 }
-</code></pre>
-<hr>
-<h3 id="2---create-the-repository">2 - <strong>Create the Repository</strong></h3>
-<p>Extend the <code>SnailRepository</code> to define your data repository:</p>
-<pre class="language-dart"><code class="language-dart">import 'package:snail/snail.dart';
-import '../models/user_model.dart';
 
-class UserRepository extends SnailRepository&lt;UserModel, int&gt; {
-  UserRepository()
-      : super(
-          tableName: 'users',
-          primaryKeyColumn: 'id',
-          defineFields: {
-            'id': int,
-            'name': String,
-            'email': String,
-          },
-        );
+class User {
+  final int id;
+  final String name;
+  final String email;
+  final bool isActive;
 
-  @override
-  Map&lt;String, dynamic&gt; toMap(UserModel entity) =&gt; entity.toMap();
-
-  @override
-  UserModel fromMap(Map&lt;String, dynamic&gt; map) =&gt; UserModel.fromMap(map);
+  User({required this.id, required this.name, required this.email, required this.isActive});
 }
 </code></pre>
-<hr>
-<h3 id="3---initialize-the-database">3 - <strong>Initialize the Database</strong></h3>
-<p>Configure repositories in the <code>main()</code> function:</p>
-<pre class="language-dart"><code class="language-dart">import 'package:flutter/material.dart';
-import 'package:snail/snail.dart';
-import './repositories/user_repository.dart';
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  await Snail.initialize(
-    repositories: [
-      UserRepository(),
-    ],
-  );
-
-  runApp(AppWidget());
-}
-</code></pre>
-<hr>
-<h2 id="-usage-examples">🎉 <strong>Usage Examples</strong></h2>
-<h3 id="-create-a-new-record">📌 Create a New Record</h3>
-<pre class="language-dart"><code class="language-dart">final userRepo = UserRepository();
-await userRepo.create(UserModel(id: 1, name: 'John Doe', email: 'john@example.com'));
-</code></pre>
-<h3 id="-fetch-a-record-by-id">🔍 Fetch a Record by ID</h3>
-<pre class="language-dart"><code class="language-dart">final user = await userRepo.findOne(1);
-if (user != null) {
-  print('User found: ${user.name}');
-}
-</code></pre>
-<h3 id="-fetch-all-records">📋 Fetch All Records</h3>
-<pre class="language-dart"><code class="language-dart">final users = await userRepo.findMany();
-users.forEach((user) =&gt; print(user.name));
-</code></pre>
-<h3 id="-update-a-record">🛠️ Update a Record</h3>
-<pre class="language-dart"><code class="language-dart">final updatedUser = UserModel(id: 1, name: 'Jane Doe', email: 'jane@example.com');
-await userRepo.update(updatedUser);
-</code></pre>
-<h3 id="-delete-a-record">🗑️ Delete a Record</h3>
-<pre class="language-dart"><code class="language-dart">await userRepo.delete(1);
-</code></pre>
-<h3 id="-create-multiple-records">🚀 Create Multiple Records</h3>
-<pre class="language-dart"><code class="language-dart">await userRepo.createMany([
-  UserModel(id: 2, name: 'Alice', email: 'alice@example.com'),
-  UserModel(id: 3, name: 'Bob', email: 'bob@example.com'),
-]);
-</code></pre>
-<hr>
-<h2 id="-full-api">🧬 <strong>Full API</strong></h2>
-<h3 id="crud-methods">CRUD Methods:</h3>
-<table>
-<thead>
-<tr>
-<th>Method</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>create(T entity)</code></td>
-<td>Creates a new record.</td>
-</tr>
-<tr>
-<td><code>createMany(List&lt;T&gt;)</code></td>
-<td>Creates multiple records.</td>
-</tr>
-<tr>
-<td><code>findOne(ID id)</code></td>
-<td>Fetches a record by ID.</td>
-</tr>
-<tr>
-<td><code>findMany()</code></td>
-<td>Fetches all records.</td>
-</tr>
-<tr>
-<td><code>update(T entity)</code></td>
-<td>Updates a record.</td>
-</tr>
-<tr>
-<td><code>updateMany(List&lt;T&gt;)</code></td>
-<td>Updates multiple records.</td>
-</tr>
-<tr>
-<td><code>delete(ID id)</code></td>
-<td>Deletes a record by ID.</td>
-</tr>
-<tr>
-<td><code>deleteMany(List&lt;ID&gt;)</code></td>
-<td>Deletes multiple records.</td>
-</tr>
-</tbody>
-</table>
-<hr>
-<h2 id="-testing">🧪 <strong>Testing</strong></h2>
-<p>A basic unit test example:</p>
+<h3 id="-using-the-repository">⚡ Using the Repository</h3>
 <pre class="language-dart"><code class="language-dart">void main() async {
-  final repo = UserRepository();
+  final userRepository = UserRepository();
 
-  await repo.create(UserModel(id: 1, name: 'Test User', email: 'test@test.com'));
-  final user = await repo.findOne(1);
+  // Save a user
+  await userRepository.save(User(id: 1, name: 'John Doe', email: 'john@example.com', isActive: true));
 
-  assert(user?.name == 'Test User');
-  print('Test passed 🎉');
+  // Find a user by ID
+  final user = await userRepository.findById(1);
+
+  // Find all users
+  final users = await userRepository.findAll();
+
+  // Delete a user
+  await userRepository.deleteById(1);
 }
 </code></pre>
+<h2 id="-dynamic-methods">🛠️ Dynamic Methods</h2>
+<p>The <code>dynamicMethod</code> allows constructing SQL queries based on the method naming. The naming structure should follow standard conventions:</p>
+<h3 id="-naming-structure">🧱 Naming Structure</h3>
+<ul>
+<li><strong>Prefixes</strong>: <code>find</code> or <code>findAll</code></li>
+<li><strong>Connectors</strong>: <code>And</code>, <code>Or</code></li>
+<li><strong>Operators</strong>: <code>Between</code>, <code>LessThan</code>, <code>GreaterThan</code>, <code>Like</code>, <code>StartingWith</code>, <code>EndingWith</code>, <code>Containing</code>, <code>In</code>, <code>NotIn</code>, <code>OrderBy</code>, <code>True</code>, <code>False</code>, <code>IsNull</code>, <code>NotNull</code></li>
+</ul>
+<h3 id="-example-naming-conventions">📋 Example Naming Conventions</h3>
+<pre class="language-dart"><code class="language-dart">findByTitle(String title);
+findById(int id);
+findByTitleAndDescription(String title, String description);
+findByTitleOrDescription(String title, String description);
+findByTitleStartingWith(String title);
+findByTitleEndingWith(String title);
+findByTitleContaining(String title);
+findByIdLessThan(int id);
+findByIdGreaterThan(int id);
+findByDateBetween(DateTime startDate, DateTime endDate);
+findByTitleStartingWithAndIdLessThan(String title, int id);
+findByTitleContainingOrDescriptionLike(String title, String description);
+findByIdIn(List&lt;int&gt; ids);
+findByIdNotIn(List&lt;int&gt; ids);
+findByTitleOrderByDate(String title);
+findByTitleOrderByDateDesc(String title);
+findByTitleAndDescriptionOrderByDate(String title, String description);
+findByIsActiveTrue();
+findByIsActiveFalse();
+findByTitleIsNull();
+findByTitleNotNull();
+</code></pre>
+<h3 id="-usage-example">🛠️ Usage Example</h3>
+<pre class="language-dart"><code class="language-dart">Future&lt;List&lt;User&gt;&gt; findByTitleStartingWith(String title) {
+  return dynamicMethod('findByTitleStartingWith', [title]);
+}
+</code></pre>
+<h2 id="-crud-operations">🔄 CRUD Operations</h2>
+<h3 id="-save-or-update-an-entity">💾 Save or Update an Entity</h3>
+<pre class="language-dart"><code class="language-dart">Future&lt;int&gt; save(T entity);
+</code></pre>
+<h3 id="-save-or-update-multiple-entities">💾 Save or Update Multiple Entities</h3>
+<pre class="language-dart"><code class="language-dart">Future&lt;List&lt;int&gt;&gt; saveAll(List&lt;T&gt; entities);
+</code></pre>
+<h3 id="-find-an-entity-by-id">🔍 Find an Entity by ID</h3>
+<pre class="language-dart"><code class="language-dart">Future&lt;T?&gt; findById(ID id);
+</code></pre>
+<h3 id="-find-all-entities">🔍 Find All Entities</h3>
+<pre class="language-dart"><code class="language-dart">Future&lt;List&lt;T&gt;&gt; findAll();
+</code></pre>
+<h3 id="-delete-an-entity-by-id">❌ Delete an Entity by ID</h3>
+<pre class="language-dart"><code class="language-dart">Future&lt;int&gt; deleteById(ID id);
+</code></pre>
+<h3 id="-delete-all-entities">❌ Delete All Entities</h3>
+<pre class="language-dart"><code class="language-dart">Future&lt;int&gt; deleteAll(List&lt;T&gt;? entities);
+</code></pre>
+<h3 id="-count-entities">📊 Count Entities</h3>
+<pre class="language-dart"><code class="language-dart">Future&lt;int&gt; count();
+</code></pre>
+<h2 id="-contributing">🤝 Contributing</h2>
+<p>Feel free to fork this repository and contribute by submitting a pull request. 🛠️</p>
+<h2 id="-license">📜 License</h2>
+<p>This project is licensed under the MIT License. 📄</p>
 <hr>
-<h2 id="-contributing">💛 <strong>Contributing</strong></h2>
-<p>Contributions are always welcome! Open an issue or submit a pull request on the GitHub repository.</p>
-<hr>
-<h2 id="-license">📜 <strong>License</strong></h2>
-<p>This project is licensed under the <strong>MIT License</strong>.</p>
-<hr>
-<h2 id="-ready-to-simplify-your-sqlite">🚀 <strong>Ready to Simplify Your SQLite?</strong></h2>
-<p>Boost your productivity with <strong>Snail</strong> and make your SQLite operations simple and efficient! 🐌💨</p>
-<hr>
-<p><strong>Made with ❤️ for Flutter developers!</strong> 🎯</p>
+<p>Made with ❤️ for Flutter developers! 🎯</p>
 </section>
 
 
@@ -271,7 +225,7 @@ await userRepo.update(updatedUser);
 <footer>
   <span class="no-break">
     snail
-      1.0.3
+      1.1.0
   </span>
   
 </footer>

@@ -75,7 +75,7 @@
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">String generateCreateTableQuery() {
   final fieldDefinitions = defineFields.entries
-      .map((entry) =&gt; &#39;${entry.key} ${_typeToSql(entry.value)}&#39;)
+      .map((entry) =&gt; &#39;${toSnakeCase(entry.key)} ${_typeToSql(entry.value)}&#39;)
       .join(&#39;, &#39;);
 
   return &#39;&#39;&#39;
@@ -112,7 +112,7 @@
 <footer>
   <span class="no-break">
     snail
-      1.0.3
+      1.1.0
   </span>
   
 </footer>

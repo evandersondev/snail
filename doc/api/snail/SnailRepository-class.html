@@ -59,9 +59,8 @@
     
 <section class="desc markdown">
   <p>A base class for repositories that handle the operations on database tables.</p>
-<p>It provides methods for creating, reading, updating, and deleting records in
-the database table defined by the repository. It uses SQLite as the database
-backend via the <a href="https://pub.dev/documentation/sqflite/2.4.1/sqflite/">sqflite</a> package.</p>
+<p>It provides methods similar to Spring Data JPA, such as saving, finding,
+counting, and deleting entities in the database.</p>
 </section>
 
 
@@ -154,80 +153,132 @@ primary key column, and field definitions.
       id="instance-methods">
     <h2>Methods</h2>
     <dl class="callables">
-        <dt id="create" class="callable">
-  <span class="name"><a href="../snail/SnailRepository/create.html">create</a></span><span class="signature">(<wbr><span class="parameter" id="create-param-entity"><span class="type-annotation">T</span> <span class="parameter-name">entity</span></span>)
+        <dt id="count" class="callable">
+  <span class="name"><a href="../snail/SnailRepository/count.html">count</a></span><span class="signature">(<wbr>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
   </span>
   
 
 </dt>
 <dd>
-  Inserts a new item into the database.
-  
-
-</dd>
-
-        <dt id="createMany" class="callable">
-  <span class="name"><a href="../snail/SnailRepository/createMany.html">createMany</a></span><span class="signature">(<wbr><span class="parameter" id="createMany-param-entities"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span></span> <span class="parameter-name">entities</span></span>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Inserts multiple items into the database.
+  Returns the count of entities in the database.
   
 
 </dd>
 
         <dt id="delete" class="callable">
-  <span class="name"><a href="../snail/SnailRepository/delete.html">delete</a></span><span class="signature">(<wbr><span class="parameter" id="delete-param-id"><span class="type-annotation">ID</span> <span class="parameter-name">id</span></span>)
+  <span class="name"><a href="../snail/SnailRepository/delete.html">delete</a></span><span class="signature">(<wbr><span class="parameter" id="delete-param-entity"><span class="type-annotation">T</span> <span class="parameter-name">entity</span></span>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
   </span>
   
 
 </dt>
 <dd>
-  Deletes an item by its ID from the database.
+  Deletes an entity from the database.
   
 
 </dd>
 
-        <dt id="deleteMany" class="callable">
-  <span class="name"><a href="../snail/SnailRepository/deleteMany.html">deleteMany</a></span><span class="signature">(<wbr><span class="parameter" id="deleteMany-param-ids"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter">ID</span>&gt;</span></span> <span class="parameter-name">ids</span></span>)
+        <dt id="deleteAll" class="callable">
+  <span class="name"><a href="../snail/SnailRepository/deleteAll.html">deleteAll</a></span><span class="signature">(<wbr><span class="parameter" id="deleteAll-param-entities"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span>?</span> <span class="parameter-name">entities</span></span>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
   </span>
   
 
 </dt>
 <dd>
-  Deletes multiple items by their IDs from the database.
+  Deletes multiple entities from the database.
   
 
 </dd>
 
-        <dt id="findMany" class="callable">
-  <span class="name"><a href="../snail/SnailRepository/findMany.html">findMany</a></span><span class="signature">(<wbr>)
+        <dt id="deleteById" class="callable">
+  <span class="name"><a href="../snail/SnailRepository/deleteById.html">deleteById</a></span><span class="signature">(<wbr><span class="parameter" id="deleteById-param-id"><span class="type-annotation">ID</span> <span class="parameter-name">id</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Deletes an entity by its ID.
+  
+
+</dd>
+
+        <dt id="dynamicMethod" class="callable">
+  <span class="name"><a href="../snail/SnailRepository/dynamicMethod.html">dynamicMethod</a></span><span class="signature">(<wbr><span class="parameter" id="dynamicMethod-param-methodName"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">methodName</span>, [</span><span class="parameter" id="dynamicMethod-param-args"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a>?</span> <span class="parameter-name">args</span></span>])
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span></span>&gt;</span></span>
   </span>
   
 
 </dt>
 <dd>
-  Retrieves all items from the database.
+  Parses the method name and constructs a query fragment.
   
 
 </dd>
 
-        <dt id="findOne" class="callable">
-  <span class="name"><a href="../snail/SnailRepository/findOne.html">findOne</a></span><span class="signature">(<wbr><span class="parameter" id="findOne-param-id"><span class="type-annotation">ID</span> <span class="parameter-name">id</span></span>)
+        <dt id="entityToMapValue" class="callable">
+  <span class="name"><a href="../snail/SnailRepository/entityToMapValue.html">entityToMapValue</a></span><span class="signature">(<wbr><span class="parameter" id="entityToMapValue-param-entity"><span class="type-annotation">T</span> <span class="parameter-name">entity</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Converts an entity of type <code>T</code> to a map with values ready for database storage.
+  
+
+</dd>
+
+        <dt id="existsById" class="callable">
+  <span class="name"><a href="../snail/SnailRepository/existsById.html">existsById</a></span><span class="signature">(<wbr><span class="parameter" id="existsById-param-id"><span class="type-annotation">ID</span> <span class="parameter-name">id</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Checks if an entity exists by its ID.
+  
+
+</dd>
+
+        <dt id="findAll" class="callable">
+  <span class="name"><a href="../snail/SnailRepository/findAll.html">findAll</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Finds all entities in the database.
+  
+
+</dd>
+
+        <dt id="findAllById" class="callable">
+  <span class="name"><a href="../snail/SnailRepository/findAllById.html">findAllById</a></span><span class="signature">(<wbr><span class="parameter" id="findAllById-param-ids"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter">ID</span>&gt;</span></span> <span class="parameter-name">ids</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Finds all entities by their IDs.
+  
+
+</dd>
+
+        <dt id="findById" class="callable">
+  <span class="name"><a href="../snail/SnailRepository/findById.html">findById</a></span><span class="signature">(<wbr><span class="parameter" id="findById-param-id"><span class="type-annotation">ID</span> <span class="parameter-name">id</span></span>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">T?</span>&gt;</span></span>
   </span>
   
 
 </dt>
 <dd>
-  Retrieves a single item by its ID from the database.
+  Finds an entity by its ID.
   
 
 </dd>
@@ -240,7 +291,7 @@ primary key column, and field definitions.
 
 </dt>
 <dd>
-  Converts a map from the database to an entity of type <code>T</code>.
+  Converts a map to an entity of type <code>T</code>.
   
 
 </dd>
@@ -258,6 +309,58 @@ primary key column, and field definitions.
 
 </dd>
 
+        <dt id="getEntityId" class="callable">
+  <span class="name"><a href="../snail/SnailRepository/getEntityId.html">getEntityId</a></span><span class="signature">(<wbr><span class="parameter" id="getEntityId-param-entity"><span class="type-annotation">T</span> <span class="parameter-name">entity</span></span>)
+    <span class="returntype parameter">&#8594; ID</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Gets the primary key value of an entity.
+  
+
+</dd>
+
+        <dt id="keysToCamelCase" class="callable">
+  <span class="name"><a href="../snail/SnailRepository/keysToCamelCase.html">keysToCamelCase</a></span><span class="signature">(<wbr><span class="parameter" id="keysToCamelCase-param-map"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span> <span class="parameter-name">map</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Converts the keys of a given Map from snake_case to camelCase.
+  
+
+</dd>
+
+        <dt id="keysToSnakeCase" class="callable">
+  <span class="name"><a href="../snail/SnailRepository/keysToSnakeCase.html">keysToSnakeCase</a></span><span class="signature">(<wbr><span class="parameter" id="keysToSnakeCase-param-map"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span> <span class="parameter-name">map</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Converts the keys of a given Map from camelCase to snake_case.
+  
+
+</dd>
+
+        <dt id="mapValueToEntity" class="callable">
+  <span class="name"><a href="../snail/SnailRepository/mapValueToEntity.html">mapValueToEntity</a></span><span class="signature">(<wbr><span class="parameter" id="mapValueToEntity-param-map"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span> <span class="parameter-name">map</span></span>)
+    <span class="returntype parameter">&#8594; T</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Converts a map from the database to an entity of type <code>T</code>.
+  
+
+</dd>
+
         <dt id="noSuchMethod" class="callable inherited">
   <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></span><span class="signature">(<wbr><span class="parameter" id="noSuchMethod-param-invocation"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Invocation-class.html">Invocation</a></span> <span class="parameter-name">invocation</span></span>)
     <span class="returntype parameter">&#8594; dynamic</span>
@@ -271,6 +374,45 @@ primary key column, and field definitions.
 
 </dd>
 
+        <dt id="save" class="callable">
+  <span class="name"><a href="../snail/SnailRepository/save.html">save</a></span><span class="signature">(<wbr><span class="parameter" id="save-param-entity"><span class="type-annotation">T</span> <span class="parameter-name">entity</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Saves or updates an entity in the database.
+  
+
+</dd>
+
+        <dt id="saveAll" class="callable">
+  <span class="name"><a href="../snail/SnailRepository/saveAll.html">saveAll</a></span><span class="signature">(<wbr><span class="parameter" id="saveAll-param-entities"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span></span> <span class="parameter-name">entities</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Saves or updates a list of entities in the database.
+  
+
+</dd>
+
+        <dt id="toCamelCase" class="callable">
+  <span class="name"><a href="../snail/SnailRepository/toCamelCase.html">toCamelCase</a></span><span class="signature">(<wbr><span class="parameter" id="toCamelCase-param-input"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">input</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Converts a string from snake_case to camelCase.
+  
+
+</dd>
+
         <dt id="toMap" class="callable">
   <span class="name"><a href="../snail/SnailRepository/toMap.html">toMap</a></span><span class="signature">(<wbr><span class="parameter" id="toMap-param-entity"><span class="type-annotation">T</span> <span class="parameter-name">entity</span></span>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span>
@@ -279,7 +421,20 @@ primary key column, and field definitions.
 
 </dt>
 <dd>
-  Converts an entity of type <code>T</code> to a map that can be inserted into the database.
+  Converts an entity of type <code>T</code> to a map representation.
+  
+
+</dd>
+
+        <dt id="toSnakeCase" class="callable">
+  <span class="name"><a href="../snail/SnailRepository/toSnakeCase.html">toSnakeCase</a></span><span class="signature">(<wbr><span class="parameter" id="toSnakeCase-param-input"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">input</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Converts a string from camelCase to snake_case.
   
 
 </dd>
@@ -294,32 +449,6 @@ primary key column, and field definitions.
 <dd class="inherited">
   A string representation of this object.
   <div class="features"><span class="feature">inherited</span></div>
-
-</dd>
-
-        <dt id="update" class="callable">
-  <span class="name"><a href="../snail/SnailRepository/update.html">update</a></span><span class="signature">(<wbr><span class="parameter" id="update-param-entity"><span class="type-annotation">T</span> <span class="parameter-name">entity</span></span>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Updates an existing item in the database.
-  
-
-</dd>
-
-        <dt id="updateMany" class="callable">
-  <span class="name"><a href="../snail/SnailRepository/updateMany.html">updateMany</a></span><span class="signature">(<wbr><span class="parameter" id="updateMany-param-entities"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter">T</span>&gt;</span></span> <span class="parameter-name">entities</span></span>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Updates multiple items in the database.
-  
 
 </dd>
 
@@ -373,7 +502,7 @@ primary key column, and field definitions.
 <footer>
   <span class="no-break">
     snail
-      1.0.3
+      1.1.0
   </span>
   
 </footer>

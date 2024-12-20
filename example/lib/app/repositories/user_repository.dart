@@ -2,7 +2,7 @@ import 'package:snail/snail.dart';
 
 import '../models/user_model.dart';
 
-class UserRepository extends SnailRepository<UserModel, int> {
+interface class UserRepository extends SnailRepository<UserModel, int> {
   UserRepository()
       : super(
           tableName: 'users',
