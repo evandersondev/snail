@@ -16,7 +16,7 @@ Add the following dependency to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  snail: ^1.0.0
+  snail: ^1.1.0
 ```
 
 ## 🚀 Getting Started

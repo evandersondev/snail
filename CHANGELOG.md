@@ -1,6 +1,6 @@
 ## [1.1.0] - SnailRepository
 
-- JPA default methods.
+- JPA default methods and dynamic method.
 
 ## [1.0.4] - Pubspec
 
