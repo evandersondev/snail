@@ -1,3 +1,7 @@
+## [1.1.2] - Params
+
+- Add page, size and sort params to finds entity.
+
 ## [1.1.1] - Readme
 
 - Update documentation.

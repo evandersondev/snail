@@ -55,14 +55,15 @@
 <li>🛠️ Table creation based on field definitions.</li>
 <li>🔄 Automatic mapping of entities to database rows and vice versa.</li>
 <li>🔗 Support for snake_case and camelCase conversions.</li>
+<li>📜 Pagination, sorting, and filtering support.</li>
 </ul>
 <h2 id="-installation">📥 Installation</h2>
 <p>Add the following dependency to your <code>pubspec.yaml</code>:</p>
 <pre class="language-yaml"><code class="language-yaml">dependencies:
-  snail: ^1.0.0
+  snail: ^1.1.2
 </code></pre>
-<h2 id="-getting-started">🚀 Getting Started</h2>
-<h3 id="-creating-a-repository">🏗️ Creating a Repository</h3>
+<h2 id="getting-started-">Getting Started 🏁</h2>
+<h3 id="creating-a-repository-">Creating a Repository 📦</h3>
 <p>To create a repository for your model, extend the <code>SnailRepository</code> class:</p>
 <pre class="language-dart"><code class="language-dart">import 'package:snail/snail.dart';
 
@@ -79,20 +80,10 @@ class UserRepository extends SnailRepository&lt;User, int&gt; {
   );
 
   @override
-  Map&lt;String, dynamic&gt; toMap(User entity) =&gt; {
-        'id': entity.id,
-        'name': entity.name,
-        'email': entity.email,
-        'isActive': entity.isActive,
-      };
+  Map&lt;String, dynamic&gt; toMap(User entity) =&gt; entity.toMap();
 
   @override
-  User fromMap(Map&lt;String, dynamic&gt; map) =&gt; User(
-        id: map['id'],
-        name: map['name'],
-        email: map['email'],
-        isActive: map['isActive'],
-      );
+  User fromMap(Map&lt;String, dynamic&gt; map) =&gt; User.fromMap(map);
 }
 
 class User {
@@ -101,10 +92,47 @@ class User {
   final String email;
   final bool isActive;
 
-  User({required this.id, required this.name, required this.email, required this.isActive});
+  User({
+    required this.id,
+    required this.name,
+    required this.email,
+    required this.isActive,
+  });
+
+   Map&lt;String, dynamic&gt; toMap() {
+    final result = &lt;String, dynamic&gt;{};
+
+    result.addAll({'id': id});
+    result.addAll({'name': name});
+    result.addAll({'email': email});
+    result.addAll({'isActive': isActive});
+
+    return result;
+  }
+
+  factory UserModel.fromMap(Map&lt;String, dynamic&gt; map) {
+    return UserModel(
+      id: map['id']?.toInt() ?? 0,
+      name: map['name'] ?? '',
+      email: map['email'] ?? '',
+      email: map['isActive'] ?? '',
+    );
+  }
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Snail.initialize(
+    repositories: [
+      UserRepository(),
+    ],
+  );
+
+  runApp(AppWidget());
 }
 </code></pre>
-<h3 id="-using-the-repository">⚡ Using the Repository</h3>
+<h3 id="using-the-repository-">Using the Repository 🔧</h3>
 <pre class="language-dart"><code class="language-dart">void main() async {
   final userRepository = UserRepository();
 
@@ -121,15 +149,15 @@ class User {
   await userRepository.deleteById(1);
 }
 </code></pre>
-<h2 id="-dynamic-methods">🛠️ Dynamic Methods</h2>
+<h2 id="dynamic-methods-">Dynamic Methods 🔍</h2>
 <p>The <code>dynamicMethod</code> allows constructing SQL queries based on the method naming. The naming structure should follow standard conventions:</p>
-<h3 id="-naming-structure">🧱 Naming Structure</h3>
+<h3 id="naming-structure-">Naming Structure 🛠️</h3>
 <ul>
 <li><strong>Prefixes</strong>: <code>find</code> or <code>findAll</code></li>
 <li><strong>Connectors</strong>: <code>And</code>, <code>Or</code></li>
 <li><strong>Operators</strong>: <code>Between</code>, <code>LessThan</code>, <code>GreaterThan</code>, <code>Like</code>, <code>StartingWith</code>, <code>EndingWith</code>, <code>Containing</code>, <code>In</code>, <code>NotIn</code>, <code>OrderBy</code>, <code>True</code>, <code>False</code>, <code>IsNull</code>, <code>NotNull</code></li>
 </ul>
-<h3 id="-example-naming-conventions">📋 Example Naming Conventions</h3>
+<h3 id="example-naming-conventions-">Example Naming Conventions 📖</h3>
 <pre class="language-dart"><code class="language-dart">findByTitle(String title);
 findById(int id);
 findByTitleAndDescription(String title, String description);
@@ -152,37 +180,134 @@ findByIsActiveFalse();
 findByTitleIsNull();
 findByTitleNotNull();
 </code></pre>
-<h3 id="-usage-example">🛠️ Usage Example</h3>
+<h3 id="usage-example-">Usage Example 📝</h3>
 <pre class="language-dart"><code class="language-dart">Future&lt;List&lt;User&gt;&gt; findByTitleStartingWith(String title) {
   return dynamicMethod('findByTitleStartingWith', [title]);
 }
 </code></pre>
-<h2 id="-crud-operations">🔄 CRUD Operations</h2>
-<h3 id="-save-or-update-an-entity">💾 Save or Update an Entity</h3>
+<h2 id="filters-pagination-sorting-and-size-">Filters: Pagination, Sorting, and Size 📊</h2>
+<p>Snail supports additional filtering through the <code>size</code>, <code>page</code>, and <code>sort</code> parameters:</p>
+<ul>
+<li><strong><code>size</code></strong>: Specifies the number of records to fetch per page. Example: <code>size: 20</code>.</li>
+<li><strong><code>page</code></strong>: Specifies the page number to fetch. Example: <code>page: 1</code> (fetches the first 20 records if <code>size</code> is set to 20).</li>
+<li><strong><code>sort</code></strong>: Specifies the sorting order. Use the format <code>&lt;field&gt;,&lt;order&gt;</code>, where <code>&lt;order&gt;</code> can be <code>asc</code> or <code>desc</code>. Example: <code>sort: 'createdAt,asc'</code>.</li>
+</ul>
+<p>By default, Snail applies a descending sort (<code>createdAt,desc</code>) if no sorting is specified.</p>
+<h3 id="example-usage-">Example Usage 📝</h3>
+<pre class="language-dart"><code class="language-dart">Future&lt;List&lt;User&gt;&gt; findAllUsersWithPagination() async {
+  return await userRepository.findAll(
+    size: 20,
+    page: 1,
+    sort: 'createdAt,asc',
+  );
+}
+</code></pre>
+<h2 id="crud-operations-">CRUD Operations ⚙️</h2>
+<h3 id="save-or-update-an-entity-">Save or Update an Entity 💾</h3>
 <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; save(T entity);
 </code></pre>
-<h3 id="-save-or-update-multiple-entities">💾 Save or Update Multiple Entities</h3>
+<h3 id="save-or-update-multiple-entities-">Save or Update Multiple Entities 💾💾</h3>
 <pre class="language-dart"><code class="language-dart">Future&lt;List&lt;int&gt;&gt; saveAll(List&lt;T&gt; entities);
 </code></pre>
-<h3 id="-find-an-entity-by-id">🔍 Find an Entity by ID</h3>
+<h3 id="find-an-entity-by-id-">Find an Entity by ID 🔍</h3>
 <pre class="language-dart"><code class="language-dart">Future&lt;T?&gt; findById(ID id);
 </code></pre>
-<h3 id="-find-all-entities">🔍 Find All Entities</h3>
-<pre class="language-dart"><code class="language-dart">Future&lt;List&lt;T&gt;&gt; findAll();
+<h3 id="find-all-entities-">Find All Entities 🔎</h3>
+<pre class="language-dart"><code class="language-dart">Future&lt;List&lt;T&gt;&gt; findAll({int? size, int? page, String? sort});
 </code></pre>
-<h3 id="-delete-an-entity-by-id">❌ Delete an Entity by ID</h3>
+<h3 id="delete-an-entity-by-id-">Delete an Entity by ID 🗑️</h3>
 <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; deleteById(ID id);
 </code></pre>
-<h3 id="-delete-all-entities">❌ Delete All Entities</h3>
+<h3 id="delete-all-entities-">Delete All Entities 🗑️🗑️</h3>
 <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; deleteAll(List&lt;T&gt;? entities);
 </code></pre>
-<h3 id="-count-entities">📊 Count Entities</h3>
+<h3 id="count-entities-">Count Entities 🔢</h3>
 <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; count();
 </code></pre>
-<h2 id="-contributing">🤝 Contributing</h2>
-<p>Feel free to fork this repository and contribute by submitting a pull request. 🛠️</p>
-<h2 id="-license">📜 License</h2>
-<p>This project is licensed under the MIT License. 📄</p>
+<h2 id="automatic-fields-createdat-and-updatedat-">Automatic Fields: <code>createdAt</code> and <code>updatedAt</code> 🕒</h2>
+<p>Snail automatically adds <code>createdAt</code> and <code>updatedAt</code> fields to all models. These fields track when a record was created and last updated.</p>
+<h3 id="optional-usage-in-models-">Optional Usage in Models 📌</h3>
+<p>If you wish to explicitly include these fields in your model, you can define them as optional:</p>
+<pre class="language-dart"><code class="language-dart">class TodoModel {
+  final String id;
+  final String title;
+  final bool isCompleted;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+
+  TodoModel({
+    required this.id,
+    required this.title,
+    this.isCompleted = false,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  Map&lt;String, dynamic&gt; toMap() {
+    return &lt;String, dynamic&gt;{
+      'id': id,
+      'title': title,
+      'isCompleted': isCompleted,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+    };
+  }
+
+  factory TodoModel.fromMap(Map&lt;String, dynamic&gt; map) {
+    return TodoModel(
+      id: map['id'] as String,
+      title: map['title'] as String,
+      isCompleted: map['isCompleted'] as bool,
+      createdAt: map['createdAt'] as DateTime?,
+      updatedAt: map['updatedAt'] as DateTime?,
+    );
+  }
+}
+</code></pre>
+<h2 id="full-api-">Full API 📚</h2>
+<p>Below is the complete list of methods provided by Snail Repository:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>save(T entity)</code></td>
+<td>Saves or updates an entity in the database.</td>
+</tr>
+<tr>
+<td><code>saveAll(List&lt;T&gt; entities)</code></td>
+<td>Saves or updates multiple entities in the database.</td>
+</tr>
+<tr>
+<td><code>findById(ID id)</code></td>
+<td>Finds an entity by its primary key.</td>
+</tr>
+<tr>
+<td><code>findAll({int? size, int? page, String? sort})</code></td>
+<td>Retrieves all entities with optional pagination and sorting.</td>
+</tr>
+<tr>
+<td><code>deleteAll(List&lt;T&gt;? entities)</code></td>
+<td>Deletes all entities or a list of specified entities.</td>
+</tr>
+<tr>
+<td><code>count()</code></td>
+<td>Counts the total number of entities in the database.</td>
+</tr>
+<tr>
+<td><code>dynamicMethod(String name, List&lt;Object?&gt; params)</code></td>
+<td>Executes a query based on the dynamic method naming conventions.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="contributing-">Contributing 🤝</h2>
+<p>Feel free to fork this repository and contribute by submitting a pull request. Your contributions are welcome! 💡</p>
+<h2 id="license-">License 📜</h2>
+<p>This project is licensed under the MIT License.</p>
 <hr>
 <p>Made with ❤️ for Flutter developers! 🎯</p>
 </section>
@@ -192,7 +317,7 @@ findByTitleNotNull();
           <h2>Libraries</h2>
         <dl>
           <dt id="snail">
-  <span class="name"><a href="snail/">snail</a></span> 
+  <span class="name"><a href="snail/snail-library.html">snail</a></span> 
 
 </dt>
 <dd>
@@ -215,7 +340,7 @@ findByTitleNotNull();
     <h5 class="hidden-xs"><span class="package-name">snail</span> <span class="package-kind">package</span></h5>
     <ol>
       <li class="section-title">Libraries</li>
-      <li><a href="snail/">snail</a></li>
+      <li><a href="snail/snail-library.html">snail</a></li>
 </ol>
 
   </div>
@@ -225,7 +350,7 @@ findByTitleNotNull();
 <footer>
   <span class="no-break">
     snail
-      1.1.0
+      1.1.2
   </span>
   
 </footer>

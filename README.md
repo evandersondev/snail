@@ -9,6 +9,7 @@
 - 🛠️ Table creation based on field definitions.
 - 🔄 Automatic mapping of entities to database rows and vice versa.
 - 🔗 Support for snake_case and camelCase conversions.
+- 📜 Pagination, sorting, and filtering support.
 
 ## 📥 Installation
 
@@ -16,7 +17,7 @@ Add the following dependency to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  snail: ^1.1.1
+  snail: ^1.1.2
 ```
 
 ## Getting Started 🏁
@@ -41,20 +42,10 @@ class UserRepository extends SnailRepository<User, int> {
   );
 
   @override
-  Map<String, dynamic> toMap(User entity) => {
-        'id': entity.id,
-        'name': entity.name,
-        'email': entity.email,
-        'isActive': entity.isActive,
-      };
+  Map<String, dynamic> toMap(User entity) => entity.toMap();
 
   @override
-  User fromMap(Map<String, dynamic> map) => User(
-        id: map['id'],
-        name: map['name'],
-        email: map['email'],
-        isActive: map['isActive'],
-      );
+  User fromMap(Map<String, dynamic> map) => User.fromMap(map);
 }
 
 class User {
@@ -63,7 +54,44 @@ class User {
   final String email;
   final bool isActive;
 
-  User({required this.id, required this.name, required this.email, required this.isActive});
+  User({
+    required this.id,
+    required this.name,
+    required this.email,
+    required this.isActive,
+  });
+
+   Map<String, dynamic> toMap() {
+    final result = <String, dynamic>{};
+
+    result.addAll({'id': id});
+    result.addAll({'name': name});
+    result.addAll({'email': email});
+    result.addAll({'isActive': isActive});
+
+    return result;
+  }
+
+  factory UserModel.fromMap(Map<String, dynamic> map) {
+    return UserModel(
+      id: map['id']?.toInt() ?? 0,
+      name: map['name'] ?? '',
+      email: map['email'] ?? '',
+      email: map['isActive'] ?? '',
+    );
+  }
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Snail.initialize(
+    repositories: [
+      UserRepository(),
+    ],
+  );
+
+  runApp(AppWidget());
 }
 ```
 
@@ -131,6 +159,28 @@ Future<List<User>> findByTitleStartingWith(String title) {
 }
 ```
 
+## Filters: Pagination, Sorting, and Size 📊
+
+Snail supports additional filtering through the `size`, `page`, and `sort` parameters:
+
+- **`size`**: Specifies the number of records to fetch per page. Example: `size: 20`.
+- **`page`**: Specifies the page number to fetch. Example: `page: 1` (fetches the first 20 records if `size` is set to 20).
+- **`sort`**: Specifies the sorting order. Use the format `<field>,<order>`, where `<order>` can be `asc` or `desc`. Example: `sort: 'createdAt,asc'`.
+
+By default, Snail applies a descending sort (`createdAt,desc`) if no sorting is specified.
+
+### Example Usage 📝
+
+```dart
+Future<List<User>> findAllUsersWithPagination() async {
+  return await userRepository.findAll(
+    size: 20,
+    page: 1,
+    sort: 'createdAt,asc',
+  );
+}
+```
+
 ## CRUD Operations ⚙️
 
 ### Save or Update an Entity 💾
@@ -154,7 +204,7 @@ Future<T?> findById(ID id);
 ### Find All Entities 🔎
 
 ```dart
-Future<List<T>> findAll();
+Future<List<T>> findAll({int? size, int? page, String? sort});
 ```
 
 ### Delete an Entity by ID 🗑️
@@ -175,6 +225,52 @@ Future<int> deleteAll(List<T>? entities);
 Future<int> count();
 ```
 
+## Automatic Fields: `createdAt` and `updatedAt` 🕒
+
+Snail automatically adds `createdAt` and `updatedAt` fields to all models. These fields track when a record was created and last updated.
+
+### Optional Usage in Models 📌
+
+If you wish to explicitly include these fields in your model, you can define them as optional:
+
+```dart
+class TodoModel {
+  final String id;
+  final String title;
+  final bool isCompleted;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+
+  TodoModel({
+    required this.id,
+    required this.title,
+    this.isCompleted = false,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'id': id,
+      'title': title,
+      'isCompleted': isCompleted,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+    };
+  }
+
+  factory TodoModel.fromMap(Map<String, dynamic> map) {
+    return TodoModel(
+      id: map['id'] as String,
+      title: map['title'] as String,
+      isCompleted: map['isCompleted'] as bool,
+      createdAt: map['createdAt'] as DateTime?,
+      updatedAt: map['updatedAt'] as DateTime?,
+    );
+  }
+}
+```
+
 ## Full API 📚
 
 Below is the complete list of methods provided by Snail Repository:
@@ -184,8 +280,7 @@ Below is the complete list of methods provided by Snail Repository:
 | `save(T entity)`                                   | Saves or updates an entity in the database.                      |
 | `saveAll(List<T> entities)`                        | Saves or updates multiple entities in the database.              |
 | `findById(ID id)`                                  | Finds an entity by its primary key.                              |
-| `findAll()`                                        | Retrieves all entities from the database.                        |
-| `deleteById(ID id)`                                | Deletes an entity by its primary key.                            |
+| `findAll({int? size, int? page, String? sort})`    | Retrieves all entities with optional pagination and sorting.     |
 | `deleteAll(List<T>? entities)`                     | Deletes all entities or a list of specified entities.            |
 | `count()`                                          | Counts the total number of entities in the database.             |
 | `dynamicMethod(String name, List<Object?> params)` | Executes a query based on the dynamic method naming conventions. |

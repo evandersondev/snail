@@ -1,5 +1,6 @@
-import 'package:snail/snail.dart';
 import 'package:sqflite/sqflite.dart';
+
+import 'package:snail/snail.dart';
 
 /// A base class for repositories that handle the operations on database tables.
 ///
@@ -31,9 +32,15 @@ abstract class SnailRepository<T, ID> {
   ///
   /// This method converts the field definitions into a valid SQL CREATE TABLE statement.
   String generateCreateTableQuery() {
-    final fieldDefinitions = defineFields.entries
-        .map((entry) => '${toSnakeCase(entry.key)} ${_typeToSql(entry.value)}')
-        .join(', ');
+    final fields = _getFields();
+
+    /// Converts the field names to snake_case and joins them with their types.
+    final fieldDefinitions = fields.entries.map((entry) {
+      final columnName = toSnakeCase(entry.key);
+      final columnType = _typeToSql(entry.value);
+
+      return '$columnName $columnType';
+    }).join(', ');
 
     return '''
       CREATE TABLE IF NOT EXISTS $tableName (
@@ -41,6 +48,25 @@ abstract class SnailRepository<T, ID> {
         PRIMARY KEY ($primaryKeyColumn)
       )
     ''';
+  }
+
+  /// Gets the fields of the table.
+  ///
+  /// This method returns the fields defined in [defineFields] and adds the `createdAt` and `updatedAt` fields if they are not already defined.
+  Map<String, Type> _getFields() {
+    final fieldsMap = defineFields;
+
+    /// Adds the `createdAt` field if it is not already defined.
+    if (!fieldsMap.keys.contains('createdAt')) {
+      fieldsMap.addAll({'createdAt': DateTime});
+    }
+
+    /// Adds the `updatedAt` field if it is not already defined.
+    if (!fieldsMap.keys.contains('UpdatedAt')) {
+      fieldsMap.addAll({'UpdatedAt': DateTime});
+    }
+
+    return fieldsMap;
   }
 
   /// Converts a Dart [Type] to its corresponding SQL type.
@@ -53,6 +79,8 @@ abstract class SnailRepository<T, ID> {
       return 'REAL';
     } else if (type == bool) {
       return 'INTEGER';
+    } else if (type == DateTime) {
+      return 'TEXT';
     } else {
       return 'BLOB';
     }
@@ -73,6 +101,8 @@ abstract class SnailRepository<T, ID> {
     final map = entityToMapValue(entity);
 
     if (exists) {
+      map.addAll({'updated_at': DateTime.now().toString()});
+
       // Atualiza a entidade
       return await db.update(
         tableName,
@@ -81,6 +111,9 @@ abstract class SnailRepository<T, ID> {
         whereArgs: [id],
       );
     } else {
+      map.addAll({'created_at': DateTime.now().toString()});
+      map.addAll({'updated_at': DateTime.now().toString()});
+
       // Insere a entidade
       return await db.insert(tableName, map);
     }
@@ -100,6 +133,8 @@ abstract class SnailRepository<T, ID> {
       final map = entityToMapValue(entity);
 
       if (exists) {
+        map.addAll({'updated_at': DateTime.now().toString()});
+
         await db.update(
           tableName,
           map,
@@ -107,6 +142,9 @@ abstract class SnailRepository<T, ID> {
           whereArgs: [id],
         );
       } else {
+        map.addAll({'created_at': DateTime.now().toString()});
+        map.addAll({'updated_at': DateTime.now().toString()});
+
         final insertedId = await db.insert(tableName, map);
         results.add(insertedId);
       }
@@ -130,21 +168,68 @@ abstract class SnailRepository<T, ID> {
   }
 
   /// Finds all entities in the database.
-  Future<List<T>> findAll() async {
+  Future<List<T>> findAll({
+    int? size,
+    String? sort,
+    int? page,
+  }) async {
     final db = await _getDatabase();
-    var result = await db.query(tableName);
+
+    final sortList = sort?.split(',');
+    List<String>? order = ['created_at', 'DESC'];
+
+    if (sortList != null) {
+      order[0] = toSnakeCase(sortList[0]);
+    }
+
+    if (sortList != null && sortList.length > 1) {
+      order[1] = sortList[1].toUpperCase();
+    }
+
+    final offset = page != null && size != null ? (page - 1) * size : null;
+
+    var result = await db.query(
+      tableName,
+      limit: size,
+      orderBy: order.join(' '),
+      offset: offset,
+    );
+
     return result.map((e) => mapValueToEntity(e)).toList();
   }
 
   /// Finds all entities by their IDs.
-  Future<List<T>> findAllById(List<ID> ids) async {
+  Future<List<T>> findAllById(
+    List<ID> ids, {
+    int? size,
+    String? sort,
+    int? page,
+  }) async {
     final db = await _getDatabase();
+
+    final sortList = sort?.split(',');
+    List<String>? order = ['created_at', 'DESC'];
+
+    if (sortList != null) {
+      order[0] = toSnakeCase(sortList[0]);
+    }
+
+    if (sortList != null && sortList.length > 1) {
+      order[1] = sortList[1].toUpperCase();
+    }
+
+    final offset = page != null && size != null ? (page - 1) * size : null;
+
     var result = await db.query(
       tableName,
       where:
           '$primaryKeyColumn IN (${List.filled(ids.length, '?').join(', ')})',
       whereArgs: ids,
+      limit: size,
+      orderBy: order.join(' '),
+      offset: offset,
     );
+
     return result.map((e) => mapValueToEntity(e)).toList();
   }
 
@@ -217,8 +302,14 @@ abstract class SnailRepository<T, ID> {
 
     // Converts boolean values to 0 and 1, if necessary
     final convertedMap = map.map((key, value) {
+      /// Converts a boolean value to an integer representation for database storage.
       if (value is bool) {
         return MapEntry(key, _boolToInt(value)); // True -> 1, False -> 0
+      }
+
+      /// Converts a DateTime object to a string representation.
+      if (value is DateTime) {
+        return MapEntry(key, value.toString());
       }
       return MapEntry(key, value);
     });
@@ -231,10 +322,19 @@ abstract class SnailRepository<T, ID> {
 
   /// Converts a map from the database to an entity of type [T].
   T mapValueToEntity(Map<String, dynamic> map) {
+    final fields = keysToSnakeCase(_getFields());
+
     final convertedMap = map.map((key, value) {
+      /// Converts a boolean value from an integer representation in the database.
       if (value is int) {
         return MapEntry(key, _intToBool(value)); // True -> 1, False -> 0
       }
+
+      /// Converts a string to a DateTime object.
+      if (fields[key] == DateTime) {
+        return MapEntry(key, DateTime.parse(value));
+      }
+
       return MapEntry(key, value);
     });
 

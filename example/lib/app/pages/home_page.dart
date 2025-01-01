@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
+
 import 'package:example/app/models/todo_model.dart';
 import 'package:example/app/repositories/todo_repository.dart';
-import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -23,8 +25,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> initAsync() async {
-    final response = await _respository.findAll();
-    // final response = await _respository.findByIsCompletedFalse();
+    final response = await _respository.findAll(sort: 'updatedAt, desc');
 
     setState(() {
       todos = response;
@@ -67,42 +68,63 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             Expanded(
-              child: ListView.separated(
-                separatorBuilder: (context, index) => SizedBox(height: 12),
-                itemCount: todos.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(
-                      todos[index].title,
-                      style: TextStyle(
-                        decoration: todos[index].isCompleted
-                            ? TextDecoration.lineThrough
-                            : TextDecoration.none,
-                        color: todos[index].isCompleted
-                            ? Colors.grey
-                            : Colors.black,
+              child: RefreshIndicator(
+                onRefresh: initAsync,
+                child: ListView.separated(
+                  separatorBuilder: (context, index) => SizedBox(height: 12),
+                  itemCount: todos.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      title: Text(
+                        todos[index].title,
+                        style: TextStyle(
+                          decoration: todos[index].isCompleted
+                              ? TextDecoration.lineThrough
+                              : TextDecoration.none,
+                          color: todos[index].isCompleted
+                              ? Colors.grey
+                              : Colors.black,
+                        ),
                       ),
-                    ),
-                    trailing: IconButton(
-                      onPressed: () async {
-                        await _respository.deleteById(todos[index].id);
+                      subtitle: Text(
+                        DateFormat('dd/MM/yyyy HH:mm')
+                            .format(todos[index].createdAt!),
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            onPressed: () async {
+                              await _respository.save(todos[index].copyWith(
+                                title: '${todos[index].title} (edited)',
+                              ));
+                              await initAsync();
+                            },
+                            icon: Icon(Icons.edit),
+                          ),
+                          IconButton(
+                            onPressed: () async {
+                              await _respository.deleteById(todos[index].id);
+                              await initAsync();
+                            },
+                            icon: Icon(Icons.delete),
+                          ),
+                        ],
+                      ),
+                      onTap: () async {
+                        await _respository.save(
+                          TodoModel(
+                            id: todos[index].id,
+                            title: todos[index].title,
+                            isCompleted: !todos[index].isCompleted,
+                          ),
+                        );
+
                         await initAsync();
                       },
-                      icon: Icon(Icons.delete),
-                    ),
-                    onTap: () async {
-                      await _respository.save(
-                        TodoModel(
-                          id: todos[index].id,
-                          title: todos[index].title,
-                          isCompleted: !todos[index].isCompleted,
-                        ),
-                      );
-
-                      await initAsync();
-                    },
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
           ],
