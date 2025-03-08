@@ -235,6 +235,7 @@ abstract class SnailRepository<T, ID> {
 
   /// Checks if an entity exists by its ID.
   Future<bool> existsById(ID id) async {
+    if (id == null) return false;
     final db = await _getDatabase();
     var result = await db.query(
       tableName,
@@ -326,7 +327,7 @@ abstract class SnailRepository<T, ID> {
 
     final convertedMap = map.map((key, value) {
       /// Converts a boolean value from an integer representation in the database.
-      if (value is int) {
+      if (fields[key] == bool) {
         return MapEntry(key, _intToBool(value)); // True -> 1, False -> 0
       }
 
