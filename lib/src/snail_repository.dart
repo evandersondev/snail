@@ -474,7 +474,7 @@ abstract class SnailRepository<T, ID> {
     if (input.isEmpty) return input;
     StringBuffer buffer = StringBuffer();
     for (int i = 0; i < input.length; i++) {
-      if (i > 0 && input[i].toUpperCase() == input[i]) {
+      if (i > 0 && input[i].toUpperCase() == input[i] && input[i] != '_') {
         buffer.write('_');
       }
       buffer.write(input[i].toLowerCase());

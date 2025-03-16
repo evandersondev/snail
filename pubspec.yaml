@@ -1,6 +1,6 @@
 name: snail
 description: A library inspired by Spring Boot's JPA that facilitates SQLite database management in Flutter/Dart applications.
-version: 1.1.3
+version: 1.1.4
 homepage: https://github.com/evandersondev/snail
 
 platforms:
