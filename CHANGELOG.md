@@ -1,3 +1,11 @@
+## [1.1.4] - Bug
+
+- fix bug in toSnakeCase
+
+## [1.1.3] - Types
+
+- fix bug in integer types and handling in null ids
+
 ## [1.1.2] - Params
 
 - Add page, size and sort params to finds entity.
