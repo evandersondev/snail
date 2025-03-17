@@ -471,15 +471,11 @@ abstract class SnailRepository<T, ID> {
 
   /// Converts a string from camelCase to snake_case.
   String toSnakeCase(String input) {
-    if (input.isEmpty) return input;
-    StringBuffer buffer = StringBuffer();
-    for (int i = 0; i < input.length; i++) {
-      if (i > 0 && input[i].toUpperCase() == input[i]) {
-        buffer.write('_');
-      }
-      buffer.write(input[i].toLowerCase());
-    }
-    return buffer.toString();
+    return input
+        .replaceAllMapped(
+            RegExp(r'([a-z0-9])([A-Z])'), (match) => '${match[1]}_${match[2]}')
+        .replaceAll(RegExp(r'\s+'), '_')
+        .toLowerCase();
   }
 
   /// Converts a string from snake_case to camelCase.
